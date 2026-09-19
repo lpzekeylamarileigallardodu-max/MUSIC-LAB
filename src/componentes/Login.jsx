@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
     // ------------ variables ------------
     const [usr, setUsr] = useState('');
     const [pass, setPass] = useState('');
     const [hoverEnlace, setHoverEnlace] = useState(false);
+    const nav = useNavigate();
+
+    // ------------ funcion enviar ------------
+    const enm = (e) => {
+        e.preventDefault();
+        if (usr !== '' && pass !== '') {
+            nav('/inicio');
+        } else {
+            alert('Ingresa correo y contraseña');
+        }
+    };
 
     // ------------ estilos ------------
     const est = {
@@ -90,7 +101,7 @@ export default function Login() {
                 <h1 style={est.tit}>Academia Jaime Gallardo</h1>
                 <p style={est.sub}>Ingresa tus datos para acceder</p>
 
-                <form onSubmit={(e) => e.preventDefault()}>
+                <form onSubmit={enm}>
                     <div style={est.grp}>
                         <label style={est.etq}>Correo</label>
                         <input
