@@ -7,15 +7,20 @@ const Inicio = () => {
     const [btnHover, setBtnHover] = useState(null);
     const [cardHover, setCardHover] = useState(null);
 
-
     const itemsMenu = [
         { id: 'inicio', nombre: 'Inicio', activo: true },
+        { id: 'usuarios', nombre: 'Usuarios' },
         { id: 'horarios', nombre: 'Horarios' },
         { id: 'notas', nombre: 'Notas' },
         { id: 'reportes', nombre: 'Reportes' }
     ];
 
     const modulos = [
+        {
+            id: 'usuarios',
+            titulo: 'Gestión de Usuarios',
+            desc: 'Administración de cuentas, asignación de roles y control de accesos al sistema.'
+        },
         {
             id: 'horarios',
             titulo: 'Gestión de Horarios',
@@ -303,8 +308,8 @@ const Inicio = () => {
             </main>
 
             <footer style={s.footer}>
-                <p style={{ margin: '2px 0' }}>Academia Jaime Gallardo - La Paz, Bolivia</p>
-                <p style={{ margin: '2px 0' }}><small>Proyecto Académico - UNIFRANZ 2026</small></p>
+                <p style={{ margin: '2px 0' }}>Academia Jaime Gallardo - La Paz Bolivia</p>
+
             </footer>
         </div>
     );

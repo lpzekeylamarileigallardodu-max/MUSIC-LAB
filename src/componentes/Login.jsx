@@ -1,20 +1,47 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+// URL del backend que conecta con PostgreSQL
+const API_URL = 'http://localhost:4000/api/login';
 
 export default function Login() {
     // ------------ variables ------------
     const [usr, setUsr] = useState('');
     const [pass, setPass] = useState('');
     const [hoverEnlace, setHoverEnlace] = useState(false);
+    const [cargando, setCargando] = useState(false);
     const nav = useNavigate();
 
     // ------------ funcion enviar ------------
-    const enm = (e) => {
+    const enm = async (e) => {
         e.preventDefault();
-        if (usr !== '' && pass !== '') {
-            nav('/inicio');
-        } else {
+
+        if (usr === '' || pass === '') {
             alert('Ingresa correo y contraseña');
+            return;
+        }
+
+        setCargando(true);
+        try {
+            const respuesta = await axios.post(API_URL, {
+                correo: usr,
+                contrasena: pass,
+            });
+
+            if (respuesta.data.ok) {
+
+                localStorage.setItem('usuario', JSON.stringify(respuesta.data.usuario));
+                nav('/inicio');
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 401) {
+                alert('Correo o contraseña incorrectos');
+            } else {
+                alert('No se pudo conectar con el servidor. ¿Está corriendo el backend?');
+            }
+        } finally {
+            setCargando(false);
         }
     };
 
@@ -36,6 +63,7 @@ export default function Login() {
         caja: {
             backgroundColor: '#1e293b',
             padding: '2.5rem',
+
             borderRadius: '12px',
             boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
             width: '100%',
@@ -68,6 +96,7 @@ export default function Login() {
             padding: '0.75rem',
             borderRadius: '6px',
             border: '1px solid #334155',
+
             backgroundColor: '#0f172a',
             color: '#ffffff',
             fontSize: '0.95rem',
@@ -101,6 +130,7 @@ export default function Login() {
                 <h1 style={est.tit}>Academia Jaime Gallardo</h1>
                 <p style={est.sub}>Ingresa tus datos para acceder</p>
 
+
                 <form onSubmit={enm}>
                     <div style={est.grp}>
                         <label style={est.etq}>Correo</label>
@@ -124,14 +154,15 @@ export default function Login() {
                         />
                     </div>
 
-                    <button type="submit" style={est.btn}>
-                        Iniciar Sesión
+                    <button type="submit" style={est.btn} disabled={cargando}>
+                        {cargando ? 'Ingresando...' : 'Iniciar Sesión'}
                     </button>
 
                     <Link
                         to="/registro"
                         style={{
                             ...est.enlace,
+
                             color: hoverEnlace ? '#7dd3fc' : '#38bdf8',
                             textDecoration: hoverEnlace ? 'underline' : 'none'
                         }}
