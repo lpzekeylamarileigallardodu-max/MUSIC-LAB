@@ -1,3 +1,16 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100vh;
+  background-color: #0f172a;
+  overflow-x: hidden;
+}
 :root {
   --text: #6b6375;
   --text-h: #08060d;
