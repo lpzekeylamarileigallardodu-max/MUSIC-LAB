@@ -20,20 +20,22 @@ export default function Login() {
         setCargando(true);
 
         try {
-            const res = await fetch('http://localhost:8080/api/usuarios/login', {
+            const res = await fetch('http://localhost:4000/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ correo: usr, clave: pass }),
+                body: JSON.stringify({ correo: usr, contrasena: pass }),
             });
 
-            if (res.ok) {
-                const u = await res.json();
-                localStorage.setItem('usuario', JSON.stringify(u));
+            const data = await res.json();
+
+            if (res.ok && data.ok) {
+                localStorage.setItem('usuario', JSON.stringify(data.usuario));
                 nav('/inicio');
             } else {
-                setErr('Credenciales incorrectas');
+                setErr(data.mensaje || 'Credenciales incorrectas');
             }
-        } catch {
+        } catch (error) {
+            console.error('Error de red:', error);
             setErr('Error de conexión con el servidor');
         } finally {
             setCargando(false);
