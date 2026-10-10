@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
@@ -36,18 +37,24 @@ app.post('/api/login', async (req, res) => {
 
     try {
         const consulta = `
-            SELECT u.id_usuario, u.nombre_completo, u.correo, r.nombre_rol
+            SELECT u.id_usuario, u.nombre_completo, u.correo, u.contrasena, r.nombre_rol
             FROM usuario u
             JOIN rol r ON r.id_rol = u.id_rol
-            WHERE u.correo = $1 AND u.contrasena = $2
+            WHERE lower(trim(u.correo)) = lower(trim($1))
         `;
-        const resultado = await pool.query(consulta, [correo, contrasena]);
+        const resultado = await pool.query(consulta, [correo]);
 
         if (resultado.rows.length === 0) {
             return res.status(401).json({ ok: false, mensaje: 'Correo o contraseña incorrectos' });
         }
 
         const usuario = resultado.rows[0];
+        const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
+
+        if (!contrasenaValida) {
+            return res.status(401).json({ ok: false, mensaje: 'Correo o contraseña incorrectos' });
+        }
+
         return res.json({
             ok: true,
             usuario: {
@@ -64,7 +71,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.get('/api/ping', (req, res) => {
-    res.json({ ok: true, mensaje: 'Backend funcionando 🎵' });
+    res.json({ ok: true, mensaje: 'Backend funcionando' });
 });
 
 const PORT = process.env.PORT || 4000;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
-import { obtenerSesion } from '../services/userService';
+import { esDirector, obtenerSesion } from '../services/userService';
 
 interface ModuloInfo {
     id: string;
@@ -14,7 +14,7 @@ export default function Inicio() {
     const [activeId, setActiveId] = useState<string | null>(null);
 
     const getModulosPorRol = (): ModuloInfo[] => {
-        if (r === 'DIRECTOR') {
+        if (esDirector(r)) {
             return [
                 {
                     id: 'mod_usuarios',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { obtenerSesion } from '../services/userService';
+import { esDirector, obtenerSesion } from '../services/userService';
 
 export default function Navbar() {
     const nav = useNavigate();
@@ -12,7 +12,7 @@ export default function Navbar() {
     const getMods = () => {
         const mods = [{ nom: 'Inicio', ruta: '/inicio' }];
 
-        if (r === 'DIRECTOR') {
+        if (esDirector(r)) {
             mods.push({ nom: 'Usuarios', ruta: '/usuarios' });
             mods.push({ nom: 'Horarios', ruta: '/horarios' });
             mods.push({ nom: 'Notas', ruta: '/notas' });

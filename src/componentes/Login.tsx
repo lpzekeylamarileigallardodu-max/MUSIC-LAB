@@ -32,7 +32,7 @@ export default function Login() {
                 localStorage.setItem('usuario', JSON.stringify(data.usuario));
                 nav('/inicio');
             } else {
-                setErr(data.mensaje || 'Credenciales incorrectas');
+                setErr(data.mensaje || 'correo o contraseña incorrecto');
             }
         } catch (error) {
             console.error('Error de red:', error);
@@ -76,20 +76,6 @@ export default function Login() {
                     <button type="submit" style={est.btn} disabled={cargando}>
                         {cargando ? 'Ingresando...' : 'Iniciar Sesión'}
                     </button>
-
-                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                        <Link
-                            to="/registro"
-                            onMouseEnter={() => setHov(true)}
-                            onMouseLeave={() => setHov(false)}
-                            style={{
-                                ...est.enlace,
-                                color: hov ? '#7dd3fc' : '#38bdf8',
-                            }}
-                        >
-                            ¿No tienes cuenta? Regístrate
-                        </Link>
-                    </div>
                 </form>
             </div>
         </div>

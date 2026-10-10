@@ -5,6 +5,10 @@ export interface SesionUsr {
     rol: string;
 }
 
+export function esDirector(rol: string): boolean {
+    return rol === 'DIRECTOR' || rol === 'ADMINISTRADOR';
+}
+
 export function obtenerSesion(): SesionUsr | null {
     const d = localStorage.getItem('usuario');
     if (!d) return null;
