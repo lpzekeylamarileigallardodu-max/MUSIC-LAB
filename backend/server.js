@@ -39,7 +39,7 @@ app.post('/api/login', async (req, res) => {
         const consulta = `
             SELECT u.id_usuario, u.nombre_completo, u.correo, u.contrasena, r.nombre_rol
             FROM usuario u
-            JOIN rol r ON r.id_rol = u.id_rol
+                     JOIN rol r ON r.id_rol = u.id_rol
             WHERE lower(trim(u.correo)) = lower(trim($1))
         `;
         const resultado = await pool.query(consulta, [correo]);
@@ -67,6 +67,30 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error('Error en /api/login:', error.message);
         return res.status(500).json({ ok: false, mensaje: 'Error interno del servidor' });
+    }
+});
+
+// ENDPOINT DE USUARIOS CON CURSO/INSTRUMENTO REAL DESDE LA BASE DE DATOS
+app.get('/api/usuarios', async (req, res) => {
+    try {
+        const query = `
+            SELECT
+                u.id_usuario AS id,
+                u.nombre_completo AS nombre,
+                u.correo,
+                r.nombre_rol AS rol,
+                COALESCE(c.nombre_curso, 'Dirección / Cátedra') AS instrumento
+            FROM usuario u
+                     JOIN rol r ON u.id_rol = r.id_rol
+                     LEFT JOIN inscripcion i ON u.id_usuario = i.id_usuario AND i.estado_inscripcion = 'ACTIVA'
+                     LEFT JOIN curso c ON i.id_curso = c.id_curso
+            ORDER BY u.id_usuario ASC;
+        `;
+        const resultado = await pool.query(query);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error.message);
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 

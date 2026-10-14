@@ -17,7 +17,11 @@ export default function Navbar() {
             mods.push({ nom: 'Horarios', ruta: '/horarios' });
             mods.push({ nom: 'Notas', ruta: '/notas' });
             mods.push({ nom: 'Reportes Administrativos', ruta: '/reportes' });
-        } else if (r === 'DOCENTE' || r === 'ESTUDIANTE') {
+        } else if (r === 'DOCENTE') {
+            mods.push({ nom: 'Estudiantes', ruta: '/usuarios' });
+            mods.push({ nom: 'Horarios', ruta: '/horarios' });
+            mods.push({ nom: 'Notas', ruta: '/notas' });
+        } else if (r === 'ESTUDIANTE') {
             mods.push({ nom: 'Horarios', ruta: '/horarios' });
             mods.push({ nom: 'Notas', ruta: '/notas' });
         }
@@ -33,12 +37,14 @@ export default function Navbar() {
 
     return (
         <header style={st.hdr}>
-            <div>
+            {/* LADO IZQUIERDO: TÍTULO */}
+            <div style={{ flexShrink: 0 }}>
                 <h1 style={st.tit}>ACADEMIA JAIME GALLARDO</h1>
                 <p style={st.sub}>Gestión Administrativa</p>
             </div>
 
-            <nav style={{ display: 'flex', gap: '0.5rem' }}>
+            {/* CENTRO: NAVEGACIÓN */}
+            <nav style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flex: 1, margin: '0 1rem' }}>
                 {getMods().map((m, i) => {
                     const act = loc.pathname === m.ruta;
                     const isHov = hovIdx === i;
@@ -62,7 +68,8 @@ export default function Navbar() {
                 })}
             </nav>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* LADO DERECHO: ROL Y LOGOUT */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
                 <span style={st.bdg}>{r || 'INVITADO'}</span>
                 <button onClick={logout} style={st.btnOut}>
                     Cerrar sesión
@@ -84,7 +91,7 @@ const st: { [key: string]: React.CSSProperties } = {
         borderBottom: '1px solid #1e293b',
         boxSizing: 'border-box',
     },
-    tit: { margin: 0, fontSize: '1.2rem', color: '#38bdf8' },
+    tit: { margin: 0, fontSize: '1.2rem', color: '#38bdf8', whiteSpace: 'nowrap' },
     sub: { margin: 0, fontSize: '0.75rem', color: '#94a3b8' },
     btnNav: {
         border: 'none',
@@ -92,6 +99,7 @@ const st: { [key: string]: React.CSSProperties } = {
         borderRadius: '0.375rem',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
+        whiteSpace: 'nowrap',
     },
     bdg: {
         padding: '0.25rem 0.75rem',

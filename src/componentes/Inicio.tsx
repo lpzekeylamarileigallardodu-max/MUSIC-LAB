@@ -18,7 +18,7 @@ export default function Inicio() {
             return [
                 {
                     id: 'mod_usuarios',
-                    nom: 'Gestión de Usuarios',
+                    nom: 'Usuarios',
                     desc: 'Administración de cuentas, asignación de roles y control de acceso del personal y estudiantes.'
                 },
                 {
@@ -39,6 +39,11 @@ export default function Inicio() {
             ];
         } else if (r === 'DOCENTE') {
             return [
+                {
+                    id: 'mod_usuarios',
+                    nom: 'Usuarios',
+                    desc: 'Administración de cuentas, asignación de roles y control de acceso del personal y estudiantes.'
+                },
                 {
                     id: 'mod_horarios',
                     nom: 'Horarios',

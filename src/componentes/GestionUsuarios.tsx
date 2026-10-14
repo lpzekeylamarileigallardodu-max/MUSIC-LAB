@@ -1,54 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import { obtenerSesion } from '../services/userService';
-
-const USUARIOS_MOCK = [
-    { id: 1, nombre: 'Carlos Mamani Quispe', correo: 'carlos.mamani@academia.com', rol: 'DIRECTOR', instrumento: 'Batuta / Dirección' },
-    { id: 2, nombre: 'Lucía Fernández', correo: 'lucia.fernandez@academia.com', rol: 'DOCENTE', instrumento: 'Violín' },
-    { id: 3, nombre: 'Mateo Morales', correo: 'mateo.m@correo.com', rol: 'ESTUDIANTE', instrumento: 'Violonchelo' },
-    { id: 4, nombre: 'Diego Torrez', correo: 'diego.torrez@correo.com', rol: 'ESTUDIANTE', instrumento: 'Flauta Traversa' },
-    { id: 5, nombre: 'Elena Rostova', correo: 'elena.r@academia.com', rol: 'DOCENTE', instrumento: 'Trompeta' },
-    { id: 6, nombre: 'Gabriel Silva', correo: 'gabriel.s@correo.com', rol: 'ESTUDIANTE', instrumento: 'Timbales' },
-    { id: 7, nombre: 'Sofía Vargas', correo: 'sofia.v@correo.com', rol: 'ESTUDIANTE', instrumento: 'Arpa' },
-    { id: 8, nombre: 'Andrés Mendoza', correo: 'andres.m@correo.com', rol: 'ESTUDIANTE', instrumento: 'Oboe' },
-];
-
-const INSTRUMENTOS_ORQUESTA = [
-    'Todos',
-    'Violín',
-    'Viola',
-    'Violonchelo',
-    'Contrabajo',
-    'Flauta Traversa',
-    'Oboe',
-    'Clarinete',
-    'Fagot',
-    'Trompeta',
-    'Trompa / Corno',
-    'Trombón',
-    'Tuba',
-    'Timbales',
-    'Arpa'
-];
+import { FaSearch } from 'react-icons/fa';
 
 export default function GestionUsuarios() {
     const ses = obtenerSesion();
-    const r = ses?.rol ?? '';
-    const esDirector = r === 'DIRECTOR' || r === 'ADMINISTRADOR';
+    const rolSesion = (ses?.rol ?? '').trim().toUpperCase();
+    const esDocente = rolSesion.includes('DOCENTE');
 
+    const [usuarios, setUsuarios] = useState<any[]>([]);
+    const [cargando, setCargando] = useState(true);
     const [busqueda, setBusqueda] = useState('');
+    const [mostrarBuscador, setMostrarBuscador] = useState(false);
     const [filtroInstrumento, setFiltroInstrumento] = useState('Todos');
+    const [menuAbierto, setMenuAbierto] = useState(false);
 
-    const usuariosFiltrados = USUARIOS_MOCK.filter((u) => {
-        const coincideTexto =
+    useEffect(() => {
+        fetch('http://localhost:4000/api/usuarios')
+            .then((res) => res.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    const formateados = data.map((u: any) => ({
+                        id: u.id,
+                        nombre: u.nombre || 'Usuario',
+                        correo: u.correo || 'Sin correo',
+                        rol: (u.rol || 'ESTUDIANTE').trim().toUpperCase(),
+                        instrumento: u.instrumento || 'Sin curso asignado'
+                    }));
+                    setUsuarios(formateados);
+                }
+                setCargando(false);
+            })
+            .catch((err) => {
+                console.error('Error al conectar con la API de usuarios:', err);
+                setCargando(false);
+            });
+    }, []);
+
+    const instrumentosDisponibles = ['Todos', ...Array.from(new Set(
+        usuarios
+            .filter(u => !esDocente || u.rol === 'ESTUDIANTE')
+            .map(u => u.instrumento)
+    ))];
+
+    // 1. Filtrar según rol (Docente solo ve estudiantes)
+    let usuariosVisibles = usuarios.filter((u) => {
+        if (esDocente) {
+            return u.rol === 'ESTUDIANTE';
+        }
+        return true;
+    });
+
+    // 2. Filtrar por búsqueda de texto
+    if (busqueda.trim() !== '') {
+        usuariosVisibles = usuariosVisibles.filter((u) =>
             u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
             u.correo.toLowerCase().includes(busqueda.toLowerCase()) ||
-            u.instrumento.toLowerCase().includes(busqueda.toLowerCase());
+            u.instrumento.toLowerCase().includes(busqueda.toLowerCase())
+        );
+    }
 
-        const coincideInstrumento =
-            filtroInstrumento === 'Todos' || u.instrumento.toLowerCase().includes(filtroInstrumento.toLowerCase());
+    // 3. Filtrar por curso seleccionado
+    if (filtroInstrumento !== 'Todos') {
+        usuariosVisibles = usuariosVisibles.filter((u) =>
+            u.instrumento.toLowerCase().includes(filtroInstrumento.toLowerCase())
+        );
+    }
 
-        return coincideTexto && coincideInstrumento;
+    // 4. Orden jerárquico estricto (Admin 1, Docente 2, Estudiante 3)
+    const jerarquiaRol: { [key: string]: number } = {
+        ADMINISTRADOR: 1,
+        DOCENTE: 2,
+        ESTUDIANTE: 3
+    };
+
+    usuariosVisibles.sort((a, b) => {
+        const rolA = (a.rol || '').trim().toUpperCase();
+        const rolB = (b.rol || '').trim().toUpperCase();
+
+        const ordenA = jerarquiaRol[rolA] || 99;
+        const ordenB = jerarquiaRol[rolB] || 99;
+
+        if (ordenA !== ordenB) {
+            return ordenA - ordenB;
+        }
+        return a.nombre.localeCompare(b.nombre);
     });
 
     return (
@@ -56,118 +92,180 @@ export default function GestionUsuarios() {
             <Navbar />
 
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-                {!esDirector ? (
-                    /* Restricción de acceso para roles no autorizados */
-                    <div style={{ backgroundColor: '#1e293b', padding: '2rem', borderRadius: '8px', textAlign: 'center', marginTop: '2rem' }}>
-                        <p style={{ color: '#f87171', fontWeight: 'bold', fontSize: '1.2rem', margin: 0 }}>
-                            No tienes permisos para acceder a este módulo.
-                        </p>
-                    </div>
-                ) : (
-                    /* Módulo de Usuarios para DIRECTOR */
-                    <div>
-                        <h2 style={{ color: '#38bdf8', marginBottom: '1.5rem', fontSize: '1.8rem' }}>
-                            Gestión de Usuarios - Secciones de Orquesta
-                        </h2>
+                <div>
+                    <h2 style={{ color: '#38bdf8', fontSize: '1.8rem', marginBottom: '1.5rem' }}>
+                        {esDocente ? 'Lista de Estudiantes' : 'Gestión de Usuarios'}
+                    </h2>
 
-                        {/* BARRA DE BÚSQUEDA */}
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <input
-                                type="text"
-                                placeholder="Busqueda de usuarios por nombre o instrumento"
-                                value={busqueda}
-                                onChange={(e) => setBusqueda(e.target.value)}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+
+                        {/* DESPLEGABLE */}
+                        <div style={{ position: 'relative', width: '280px' }}>
+                            <div
+                                onClick={() => setMenuAbierto(!menuAbierto)}
                                 style={{
-                                    width: '100%',
+                                    backgroundColor: '#1e293b',
                                     padding: '0.8rem 1.2rem',
                                     borderRadius: '8px',
                                     border: '1px solid #334155',
-                                    backgroundColor: '#1e293b',
-                                    color: '#ffffff',
-                                    fontSize: '1rem',
-                                    outline: 'none',
-                                    boxSizing: 'border-box'
+                                    color: '#38bdf8',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.95rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    userSelect: 'none'
                                 }}
-                            />
-                        </div>
+                            >
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    Filtrar: {filtroInstrumento}
+                                </span>
+                                <span style={{ transition: 'transform 0.3s ease', transform: menuAbierto ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+                            </div>
 
-
-                        <div style={{ marginBottom: '2rem' }}>
-                            <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                                Filtrar por Instrumento:
-                            </p>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                {INSTRUMENTOS_ORQUESTA.map((inst) => {
-                                    const activo = filtroInstrumento === inst;
-                                    return (
-                                        <button
-                                            key={inst}
-                                            onClick={() => setFiltroInstrumento(inst)}
-                                            style={{
-                                                padding: '0.4rem 0.9rem',
-                                                borderRadius: '20px',
-                                                border: 'none',
-                                                backgroundColor: activo ? '#38bdf8' : '#334155',
-                                                color: activo ? '#0f172a' : '#f8fafc',
-                                                fontWeight: activo ? 'bold' : 'normal',
-                                                cursor: 'pointer',
-                                                fontSize: '0.85rem',
-                                                transition: 'all 0.2s ease'
-                                            }}
-                                        >
-                                            {inst}
-                                        </button>
-                                    );
-                                })}
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: '105%',
+                                    left: 0,
+                                    width: '100%',
+                                    backgroundColor: '#1e293b',
+                                    border: '1px solid #334155',
+                                    borderRadius: '8px',
+                                    maxHeight: menuAbierto ? '250px' : '0px',
+                                    opacity: menuAbierto ? 1 : 0,
+                                    overflowY: 'auto',
+                                    transition: 'all 0.5s ease-in-out',
+                                    zIndex: 10,
+                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)'
+                                }}
+                            >
+                                {instrumentosDisponibles.map((inst) => (
+                                    <div
+                                        key={inst}
+                                        onClick={() => {
+                                            setFiltroInstrumento(inst);
+                                            setMenuAbierto(false);
+                                        }}
+                                        style={{
+                                            padding: '0.7rem 1.2rem',
+                                            cursor: 'pointer',
+                                            color: filtroInstrumento === inst ? '#38bdf8' : '#f8fafc',
+                                            backgroundColor: filtroInstrumento === inst ? '#0f172a' : 'transparent',
+                                            fontSize: '0.9rem',
+                                            borderBottom: '1px solid #334155',
+                                            transition: 'background-color 0.2s ease'
+                                        }}
+                                    >
+                                        {inst}
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
+                        {/* BUSCADOR */}
+                        <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1e293b', padding: '0.6rem 1rem', borderRadius: '25px', border: '1px solid #334155', transition: 'all 0.5s ease-in-out' }}>
+                            <button
+                                onClick={() => setMostrarBuscador(!mostrarBuscador)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#38bdf8',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    fontSize: '1.1rem',
+                                    padding: '0.2rem 0.4rem'
+                                }}
+                                title="Buscar usuario"
+                            >
+                                <FaSearch />
+                            </button>
 
-                        <div style={{ backgroundColor: '#1e293b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                <thead>
-                                <tr style={{ backgroundColor: '#0f172a', color: '#38bdf8', borderBottom: '1px solid #334155' }}>
-                                    <th style={{ padding: '1rem' }}>Usuario</th>
-                                    <th style={{ padding: '1rem' }}>Correo</th>
-                                    <th style={{ padding: '1rem' }}>Rol</th>
-                                    <th style={{ padding: '1rem' }}>Instrumento Asignado</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {usuariosFiltrados.length > 0 ? (
-                                    usuariosFiltrados.map((u) => (
-                                        <tr key={u.id} style={{ borderBottom: '1px solid #334155' }}>
-                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>{u.nombre}</td>
-                                            <td style={{ padding: '1rem', color: '#94a3b8' }}>{u.correo}</td>
-                                            <td style={{ padding: '1rem' }}>
-                          <span
-                              style={{
-                                  padding: '0.2rem 0.6rem',
-                                  borderRadius: '4px',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 'bold',
-                                  backgroundColor: u.rol === 'DIRECTOR' ? '#0284c7' : u.rol === 'DOCENTE' ? '#16a34a' : '#64748b',
-                                  color: '#ffffff'
-                              }}
-                          >
-                            {u.rol}
-                          </span>
-                                            </td>
-                                            <td style={{ padding: '1rem', color: '#38bdf8' }}>{u.instrumento}</td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-                                            No se encontraron usuarios que coincidan con la búsqueda.
-                                        </td>
-                                    </tr>
-                                )}
-                                </tbody>
-                            </table>
+                            <div
+                                style={{
+                                    width: mostrarBuscador ? '280px' : '0px',
+                                    opacity: mostrarBuscador ? 1 : 0,
+                                    overflow: 'hidden',
+                                    transition: 'all 0.5s ease-in-out',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}
+                            >
+                                <input
+                                    type="text"
+                                    placeholder="Escriba el nombre a buscar..."
+                                    value={busqueda}
+                                    onChange={(e) => setBusqueda(e.target.value)}
+                                    style={{
+                                        border: 'none',
+                                        backgroundColor: 'transparent',
+                                        color: '#ffffff',
+                                        outline: 'none',
+                                        fontSize: '0.95rem',
+                                        width: '100%',
+                                        paddingLeft: '0.5rem'
+                                    }}
+                                />
+                            </div>
                         </div>
+
                     </div>
-                )}
+
+                    {/* TABLA */}
+                    <div style={{ backgroundColor: '#1e293b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                            <tr style={{ backgroundColor: '#0f172a', color: '#38bdf8', borderBottom: '1px solid #334155' }}>
+                                <th style={{ padding: '1rem' }}>ID</th>
+                                <th style={{ padding: '1rem' }}>Usuario</th>
+                                <th style={{ padding: '1rem' }}>Correo</th>
+                                <th style={{ padding: '1rem' }}>Rol</th>
+                                <th style={{ padding: '1rem' }}>Instrumento / Sección</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {cargando ? (
+                                <tr>
+                                    <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                                        Cargando datos...
+                                    </td>
+                                </tr>
+                            ) : usuariosVisibles.length > 0 ? (
+                                usuariosVisibles.map((u) => (
+                                    <tr key={u.id + '-' + u.instrumento} style={{ borderBottom: '1px solid #334155' }}>
+                                        <td style={{ padding: '1rem', color: '#94a3b8' }}>#{u.id}</td>
+                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>{u.nombre}</td>
+                                        <td style={{ padding: '1rem', color: '#94a3b8' }}>{u.correo}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span
+                                                style={{
+                                                    padding: '0.2rem 0.6rem',
+                                                    borderRadius: '4px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: u.rol === 'ADMINISTRADOR' ? '#0284c7' : u.rol === 'DOCENTE' ? '#16a34a' : '#64748b',
+                                                    color: '#ffffff'
+                                                }}
+                                            >
+                                                {u.rol}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem', color: '#38bdf8' }}>{u.instrumento}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                                        No se encontraron registros
+                                    </td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </main>
         </div>
     );
