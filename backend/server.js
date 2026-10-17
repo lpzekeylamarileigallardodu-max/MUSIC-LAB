@@ -21,11 +21,11 @@ const pool = new Pool({
 pool
     .connect()
     .then((client) => {
-        console.log('✅ Conectado a PostgreSQL correctamente');
+        console.log('Conectado a PostgreSQL correctamente');
         client.release();
     })
     .catch((err) => {
-        console.error(' Error al conectar con PostgreSQL:', err.message);
+        console.error('Error al conectar con PostgreSQL:', err.message);
     });
 
 // LOGIN
@@ -74,18 +74,126 @@ app.post('/api/login', async (req, res) => {
 // OBTENER CURSOS DISPONIBLES
 app.get('/api/cursos', async (req, res) => {
     try {
-        // Intentar consultar usando nombres estándar de columnas de cursos
         const resultado = await pool.query('SELECT id_curso, nombre_curso FROM curso ORDER BY nombre_curso ASC;');
         res.json(resultado.rows);
     } catch (error) {
         try {
-            // Plan B por si la columna se llama diferente en tu BD
             const resultadoAlt = await pool.query('SELECT * FROM curso;');
             res.json(resultadoAlt.rows.map(c => ({ id_curso: c.id_curso || c.id, nombre_curso: c.nombre_curso || c.nombre || c.descripcion })));
         } catch (errAlt) {
             console.error('Error al obtener cursos:', errAlt.message);
             res.status(500).json({ error: 'Error interno al obtener cursos' });
         }
+    }
+});
+
+// OBTENER DOCENTES
+app.get('/api/docentes', async (req, res) => {
+    try {
+        const query = `
+            SELECT DISTINCT u.id_usuario, u.nombre_completo
+            FROM usuario u
+                     JOIN rol r ON u.id_rol = r.id_rol
+            WHERE LOWER(r.nombre_rol) LIKE '%docente%'
+               OR LOWER(r.nombre_rol) LIKE '%profesor%'
+            ORDER BY u.nombre_completo ASC;
+        `;
+        const resultado = await pool.query(query);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error('Error al obtener docentes:', error.message);
+        res.status(500).json({ error: 'Error al obtener docentes' });
+    }
+});
+
+// OBTENER HORARIOS
+app.get('/api/horarios', async (req, res) => {
+    try {
+        const query = `
+            SELECT
+                h.id_horario,
+                h.id_curso,
+                c.nombre_curso AS instrumento,
+                h.dia,
+                h.aula,
+                TO_CHAR(h.hora_inicio, 'HH24:MI') AS hora_inicio,
+                TO_CHAR(h.hora_fin, 'HH24:MI') AS hora_fin,
+                u.nombre_completo AS docente,
+                u.id_usuario AS id_docente
+            FROM horario h
+                     JOIN curso c ON h.id_curso = c.id_curso
+                     LEFT JOIN docente d ON c.id_usuario = d.id_usuario
+                     LEFT JOIN usuario u ON d.id_usuario = u.id_usuario
+            ORDER BY h.dia, h.hora_inicio;
+        `;
+        const resultado = await pool.query(query);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error('Error al obtener horarios:', error.message);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// CREAR HORARIO
+app.post('/api/horarios', async (req, res) => {
+    const { id_curso, id_docente, dia, aula, hora_inicio, hora_fin } = req.body;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        if (id_docente && id_curso) {
+            await client.query('UPDATE curso SET id_usuario = $1 WHERE id_curso = $2', [id_docente, id_curso]);
+        }
+
+        const query = `
+            INSERT INTO horario (id_curso, dia, aula, hora_inicio, hora_fin)
+            VALUES ($1, $2, $3, $4, $5)
+                RETURNING id_horario;
+        `;
+        const resultado = await client.query(query, [id_curso, dia, aula, hora_inicio, hora_fin]);
+
+        await client.query('COMMIT');
+        res.json({ ok: true, id_horario: resultado.rows[0].id_horario, mensaje: 'Horario creado exitosamente' });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error al crear horario:', error.message);
+        res.status(500).json({ ok: false, mensaje: 'Error al registrar el horario en la BD' });
+    } finally {
+        client.release();
+    }
+});
+
+// ACTUALIZAR HORARIO
+app.put('/api/horarios/:id', async (req, res) => {
+    const { id } = req.params;
+    const { id_curso, id_docente, dia, aula, hora_inicio, hora_fin } = req.body;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        if (id_docente && id_curso) {
+            await client.query('UPDATE curso SET id_usuario = $1 WHERE id_curso = $2', [id_docente, id_curso]);
+        }
+
+        const queryHorario = `
+            UPDATE horario
+            SET id_curso = COALESCE($1, id_curso),
+                aula = COALESCE($2, aula),
+                hora_inicio = COALESCE($3, hora_inicio),
+                hora_fin = COALESCE($4, hora_fin),
+                dia = COALESCE($5, dia)
+            WHERE id_horario = $6;
+        `;
+        await client.query(queryHorario, [id_curso, aula, hora_inicio, hora_fin, dia, id]);
+
+        await client.query('COMMIT');
+        res.json({ ok: true, mensaje: 'Horario actualizado correctamente' });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error al actualizar horario:', error.message);
+        res.status(500).json({ ok: false, mensaje: 'Error al actualizar horario en la BD' });
+    } finally {
+        client.release();
     }
 });
 
@@ -113,6 +221,175 @@ app.get('/api/usuarios', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener usuarios:', error.message);
         res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// OBTENER ASIGNATURAS UNICAS SIN DUPLICADOS
+app.get('/api/mis-cursos', async (req, res) => {
+    const { id_usuario, correo, rol } = req.query;
+
+    try {
+        let userId = id_usuario;
+
+        if ((!userId || userId === 'undefined' || userId === 'null') && correo) {
+            const userRes = await pool.query('SELECT id_usuario FROM usuario WHERE LOWER(correo) = LOWER($1)', [correo]);
+            if (userRes.rows.length > 0) {
+                userId = userRes.rows[0].id_usuario;
+            }
+        }
+
+        const rolUpper = String(rol || '').toUpperCase().trim();
+
+        if (rolUpper.includes('ADMIN')) {
+            const query = `
+                SELECT DISTINCT c.id_curso, c.nombre_curso, c.descripcion, c.nivel, c.costo_mensual,
+                       u.nombre_completo AS docente
+                FROM curso c
+                LEFT JOIN docente d ON c.id_usuario = d.id_usuario
+                LEFT JOIN usuario u ON d.id_usuario = u.id_usuario
+                ORDER BY c.nombre_curso ASC;
+            `;
+            const resultado = await pool.query(query);
+            return res.json(resultado.rows);
+        } else if (rolUpper.includes('DOCENTE')) {
+            const query = `
+                SELECT DISTINCT c.id_curso, c.nombre_curso, c.descripcion, c.nivel, c.costo_mensual,
+                       u.nombre_completo AS docente
+                FROM curso c
+                JOIN docente d ON c.id_usuario = d.id_usuario
+                JOIN usuario u ON d.id_usuario = u.id_usuario
+                WHERE d.id_usuario = $1 OR LOWER(u.correo) = LOWER($2)
+                ORDER BY c.nombre_curso ASC;
+            `;
+            const resultado = await pool.query(query, [userId || 0, correo || '']);
+            return res.json(resultado.rows);
+        } else {
+            // ESTUDIANTE: Filtra únicamente los cursos ACTIVOS en los que está inscrito el alumno
+            const query = `
+                SELECT DISTINCT c.id_curso, c.nombre_curso, c.descripcion, c.nivel, c.costo_mensual,
+                       u_doc.nombre_completo AS docente
+                FROM inscripcion i
+                JOIN curso c ON i.id_curso = c.id_curso
+                LEFT JOIN docente d ON c.id_usuario = d.id_usuario
+                LEFT JOIN usuario u_doc ON d.id_usuario = u_doc.id_usuario
+                JOIN usuario u_est ON i.id_usuario = u_est.id_usuario
+                WHERE (i.id_usuario = $1 OR LOWER(u_est.correo) = LOWER($2))
+                  AND LOWER(i.estado_inscripcion) = 'activa'
+                ORDER BY c.nombre_curso ASC;
+            `;
+            const resultado = await pool.query(query, [userId || 0, correo || '']);
+            return res.json(resultado.rows);
+        }
+    } catch (error) {
+        console.error('Error al obtener mis cursos:', error.message);
+        res.status(500).json({ error: 'Error al obtener mis cursos' });
+    }
+});
+
+// OBTENER ESTUDIANTES INSCRITOS EN UN CURSO (PARA DOCENTES Y ADMIN)
+app.get('/api/cursos/:id_curso/estudiantes', async (req, res) => {
+    const { id_curso } = req.params;
+    try {
+        const query = `
+            SELECT DISTINCT i.id_inscripcion, u.id_usuario, u.nombre_completo, u.correo, u.ci, i.fecha_inscripcion
+            FROM inscripcion i
+            JOIN usuario u ON i.id_usuario = u.id_usuario
+            WHERE i.id_curso = $1 AND LOWER(i.estado_inscripcion) = 'activa'
+            ORDER BY u.nombre_completo ASC;
+        `;
+        const resultado = await pool.query(query, [id_curso]);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error('Error al obtener estudiantes del curso:', error.message);
+        res.status(500).json({ error: 'Error al obtener estudiantes' });
+    }
+});
+
+// OBTENER ASISTENCIA DE UN CURSO EN UNA FECHA DADA
+app.get('/api/asistencia', async (req, res) => {
+    const { id_curso, fecha } = req.query;
+    try {
+        const query = `
+            SELECT a.id_asistencia, a.id_inscripcion, TO_CHAR(a.fecha, 'YYYY-MM-DD') AS fecha,
+                   a.estado_asistencia, a.observacion
+            FROM asistencia a
+                     JOIN inscripcion i ON a.id_inscripcion = i.id_inscripcion
+            WHERE i.id_curso = $1 AND a.fecha = $2;
+        `;
+        const resultado = await pool.query(query, [id_curso, fecha]);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error('Error al obtener asistencias:', error.message);
+        res.status(500).json({ error: 'Error al obtener asistencias' });
+    }
+});
+
+// MARCAR / ACTUALIZAR ASISTENCIA DE ESTUDIANTES
+app.post('/api/asistencia', async (req, res) => {
+    const { asistencias, fecha } = req.body;
+
+    if (!Array.isArray(asistencias) || !fecha) {
+        return res.status(400).json({ ok: false, mensaje: 'Datos insuficientes' });
+    }
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        for (const ast of asistencias) {
+            const query = `
+                INSERT INTO asistencia (id_inscripcion, fecha, estado_asistencia, observacion)
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT (id_inscripcion, fecha) 
+                DO UPDATE SET estado_asistencia = EXCLUDED.estado_asistencia,
+                              observacion = EXCLUDED.observacion;
+            `;
+            await client.query(query, [
+                ast.id_inscripcion,
+                fecha,
+                ast.estado_asistencia || 'PRESENTE',
+                ast.observacion || ''
+            ]);
+        }
+
+        await client.query('COMMIT');
+        res.json({ ok: true, mensaje: 'Asistencia registrada correctamente' });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error al guardar asistencia:', error.message);
+        res.status(500).json({ ok: false, mensaje: 'Error al guardar la asistencia' });
+    } finally {
+        client.release();
+    }
+});
+
+// HISTORIAL PROPIO DE ASISTENCIA (PARA ESTUDIANTES)
+app.get('/api/mi-asistencia', async (req, res) => {
+    const { id_usuario, correo } = req.query;
+    try {
+        let userId = id_usuario;
+
+        if ((!userId || userId === 'undefined') && correo) {
+            const userRes = await pool.query('SELECT id_usuario FROM usuario WHERE LOWER(correo) = LOWER($1)', [correo]);
+            if (userRes.rows.length > 0) {
+                userId = userRes.rows[0].id_usuario;
+            }
+        }
+
+        const query = `
+            SELECT a.id_asistencia, TO_CHAR(a.fecha, 'YYYY-MM-DD') AS fecha,
+                   a.estado_asistencia, a.observacion, c.nombre_curso
+            FROM asistencia a
+            JOIN inscripcion i ON a.id_inscripcion = i.id_inscripcion
+            JOIN curso c ON i.id_curso = c.id_curso
+            WHERE i.id_usuario = $1 O LOWER((SELECT correo FROM usuario WHERE id_usuario = i.id_usuario)) = LOWER($2)
+            ORDER BY a.fecha DESC;
+        `;
+        const resultado = await pool.query(query, [userId || 0, correo || '']);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error('Error al obtener mi asistencia:', error.message);
+        res.status(500).json({ error: 'Error al obtener asistencia' });
     }
 });
 
@@ -165,7 +442,6 @@ app.put('/api/usuarios/:id', async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        // Actualizar datos básicos (actualizando tanto nombre_completo como nombres para que se refleje en tu BD)
         const queryUsuario = `
             UPDATE usuario
             SET nombre_completo = $1, nombres = $1, correo = $2, id_rol = $3, ci = COALESCE(NULLIF($4, ''), ci)
@@ -181,7 +457,6 @@ app.put('/api/usuarios/:id', async (req, res) => {
         } else if (rolNum === 3) {
             await client.query('INSERT INTO estudiante (id_usuario) VALUES ($1) ON CONFLICT (id_usuario) DO NOTHING', [id]);
 
-            // Actualizar el curso/instrumento en la tabla inscripcion
             if (id_curso) {
                 await client.query(`DELETE FROM inscripcion WHERE id_usuario = $1`, [id]);
                 await client.query(

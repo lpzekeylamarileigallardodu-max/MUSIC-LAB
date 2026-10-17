@@ -14,14 +14,17 @@ export default function Navbar() {
 
         if (esDirector(r)) {
             mods.push({ nom: 'Usuarios', ruta: '/usuarios' });
+            mods.push({ nom: 'Asignaturas', ruta: '/cursos' });
             mods.push({ nom: 'Horarios', ruta: '/horarios' });
             mods.push({ nom: 'Notas', ruta: '/notas' });
             mods.push({ nom: 'Reportes Administrativos', ruta: '/reportes' });
         } else if (r === 'DOCENTE') {
             mods.push({ nom: 'Estudiantes', ruta: '/usuarios' });
+            mods.push({ nom: 'Asignaturas', ruta: '/cursos' });
             mods.push({ nom: 'Horarios', ruta: '/horarios' });
             mods.push({ nom: 'Notas', ruta: '/notas' });
         } else if (r === 'ESTUDIANTE') {
+            mods.push({ nom: 'Asignaturas', ruta: '/cursos' });
             mods.push({ nom: 'Horarios', ruta: '/horarios' });
             mods.push({ nom: 'Notas', ruta: '/notas' });
         }
