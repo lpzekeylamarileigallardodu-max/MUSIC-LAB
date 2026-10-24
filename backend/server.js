@@ -240,13 +240,13 @@ app.get('/api/mis-cursos', async (req, res) => {
 
         const rolUpper = String(rol || '').toUpperCase().trim();
 
-        if (rolUpper.includes('ADMIN')) {
+        if (rolUpper.includes('ADMIN') || rolUpper.includes('DIRECTOR')) {
             const query = `
                 SELECT DISTINCT c.id_curso, c.nombre_curso, c.descripcion, c.nivel, c.costo_mensual,
-                       u.nombre_completo AS docente
+                                u.nombre_completo AS docente
                 FROM curso c
-                LEFT JOIN docente d ON c.id_usuario = d.id_usuario
-                LEFT JOIN usuario u ON d.id_usuario = u.id_usuario
+                         LEFT JOIN docente d ON c.id_usuario = d.id_usuario
+                         LEFT JOIN usuario u ON d.id_usuario = u.id_usuario
                 ORDER BY c.nombre_curso ASC;
             `;
             const resultado = await pool.query(query);
@@ -254,27 +254,25 @@ app.get('/api/mis-cursos', async (req, res) => {
         } else if (rolUpper.includes('DOCENTE')) {
             const query = `
                 SELECT DISTINCT c.id_curso, c.nombre_curso, c.descripcion, c.nivel, c.costo_mensual,
-                       u.nombre_completo AS docente
+                                u.nombre_completo AS docente
                 FROM curso c
-                JOIN docente d ON c.id_usuario = d.id_usuario
-                JOIN usuario u ON d.id_usuario = u.id_usuario
+                         JOIN docente d ON c.id_usuario = d.id_usuario
+                         JOIN usuario u ON d.id_usuario = u.id_usuario
                 WHERE d.id_usuario = $1 OR LOWER(u.correo) = LOWER($2)
                 ORDER BY c.nombre_curso ASC;
             `;
             const resultado = await pool.query(query, [userId || 0, correo || '']);
             return res.json(resultado.rows);
         } else {
-            // ESTUDIANTE: Filtra únicamente los cursos ACTIVOS en los que está inscrito el alumno
             const query = `
                 SELECT DISTINCT c.id_curso, c.nombre_curso, c.descripcion, c.nivel, c.costo_mensual,
-                       u_doc.nombre_completo AS docente
+                                u_doc.nombre_completo AS docente
                 FROM inscripcion i
-                JOIN curso c ON i.id_curso = c.id_curso
-                LEFT JOIN docente d ON c.id_usuario = d.id_usuario
-                LEFT JOIN usuario u_doc ON d.id_usuario = u_doc.id_usuario
-                JOIN usuario u_est ON i.id_usuario = u_est.id_usuario
+                         JOIN curso c ON i.id_curso = c.id_curso
+                         LEFT JOIN docente d ON c.id_usuario = d.id_usuario
+                         LEFT JOIN usuario u_doc ON d.id_usuario = u_doc.id_usuario
+                         JOIN usuario u_est ON i.id_usuario = u_est.id_usuario
                 WHERE (i.id_usuario = $1 OR LOWER(u_est.correo) = LOWER($2))
-                  AND LOWER(i.estado_inscripcion) = 'activa'
                 ORDER BY c.nombre_curso ASC;
             `;
             const resultado = await pool.query(query, [userId || 0, correo || '']);
@@ -286,15 +284,15 @@ app.get('/api/mis-cursos', async (req, res) => {
     }
 });
 
-// OBTENER ESTUDIANTES INSCRITOS EN UN CURSO (PARA DOCENTES Y ADMIN)
+// OBTENER ESTUDIANTES INSCRITOS EN UN CURSO
 app.get('/api/cursos/:id_curso/estudiantes', async (req, res) => {
     const { id_curso } = req.params;
     try {
         const query = `
             SELECT DISTINCT i.id_inscripcion, u.id_usuario, u.nombre_completo, u.correo, u.ci, i.fecha_inscripcion
             FROM inscripcion i
-            JOIN usuario u ON i.id_usuario = u.id_usuario
-            WHERE i.id_curso = $1 AND LOWER(i.estado_inscripcion) = 'activa'
+                     JOIN usuario u ON i.id_usuario = u.id_usuario
+            WHERE i.id_curso = $1 AND (LOWER(i.estado_inscripcion) LIKE 'activ%' OR i.estado_inscripcion IS NULL)
             ORDER BY u.nombre_completo ASC;
         `;
         const resultado = await pool.query(query, [id_curso]);
@@ -305,7 +303,7 @@ app.get('/api/cursos/:id_curso/estudiantes', async (req, res) => {
     }
 });
 
-// OBTENER ASISTENCIA DE UN CURSO EN UNA FECHA DADA
+// OBTENER ASISTENCIA
 app.get('/api/asistencia', async (req, res) => {
     const { id_curso, fecha } = req.query;
     try {
@@ -324,7 +322,7 @@ app.get('/api/asistencia', async (req, res) => {
     }
 });
 
-// MARCAR / ACTUALIZAR ASISTENCIA DE ESTUDIANTES
+// MARCAR ASISTENCIA
 app.post('/api/asistencia', async (req, res) => {
     const { asistencias, fecha } = req.body;
 
@@ -340,9 +338,9 @@ app.post('/api/asistencia', async (req, res) => {
             const query = `
                 INSERT INTO asistencia (id_inscripcion, fecha, estado_asistencia, observacion)
                 VALUES ($1, $2, $3, $4)
-                ON CONFLICT (id_inscripcion, fecha) 
+                    ON CONFLICT (id_inscripcion, fecha) 
                 DO UPDATE SET estado_asistencia = EXCLUDED.estado_asistencia,
-                              observacion = EXCLUDED.observacion;
+                                           observacion = EXCLUDED.observacion;
             `;
             await client.query(query, [
                 ast.id_inscripcion,
@@ -363,7 +361,7 @@ app.post('/api/asistencia', async (req, res) => {
     }
 });
 
-// HISTORIAL PROPIO DE ASISTENCIA (PARA ESTUDIANTES)
+// HISTORIAL PROPIO DE ASISTENCIA
 app.get('/api/mi-asistencia', async (req, res) => {
     const { id_usuario, correo } = req.query;
     try {
@@ -380,9 +378,9 @@ app.get('/api/mi-asistencia', async (req, res) => {
             SELECT a.id_asistencia, TO_CHAR(a.fecha, 'YYYY-MM-DD') AS fecha,
                    a.estado_asistencia, a.observacion, c.nombre_curso
             FROM asistencia a
-            JOIN inscripcion i ON a.id_inscripcion = i.id_inscripcion
-            JOIN curso c ON i.id_curso = c.id_curso
-            WHERE i.id_usuario = $1 O LOWER((SELECT correo FROM usuario WHERE id_usuario = i.id_usuario)) = LOWER($2)
+                     JOIN inscripcion i ON a.id_inscripcion = i.id_inscripcion
+                     JOIN curso c ON i.id_curso = c.id_curso
+            WHERE i.id_usuario = $1 OR LOWER((SELECT correo FROM usuario WHERE id_usuario = i.id_usuario)) = LOWER($2)
             ORDER BY a.fecha DESC;
         `;
         const resultado = await pool.query(query, [userId || 0, correo || '']);
@@ -390,6 +388,120 @@ app.get('/api/mi-asistencia', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener mi asistencia:', error.message);
         res.status(500).json({ error: 'Error al obtener asistencia' });
+    }
+});
+
+// OBTENER EVALUACIONES (NOTAS) DE UN CURSO
+app.get('/api/evaluaciones', async (req, res) => {
+    const { id_curso, titulo } = req.query;
+    try {
+        const query = `
+            SELECT e.id_evaluacion, i.id_inscripcion, e.titulo, e.nota, e.observacion,
+                   TO_CHAR(e.fecha, 'YYYY-MM-DD') AS fecha
+            FROM evaluacion e
+                     JOIN inscripcion i ON e.id_inscripcion = i.id_inscripcion
+            WHERE i.id_curso = $1 AND ($2::text IS NULL OR e.titulo = $2);
+        `;
+        const resultado = await pool.query(query, [id_curso, titulo || null]);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error('Error al obtener evaluaciones:', error.message);
+        res.status(500).json({ error: 'Error al obtener evaluaciones' });
+    }
+});
+
+// REGISTRAR / ACTUALIZAR NOTAS (MANEJO ROBUSTO PARA UPDATE / INSERT)
+app.post('/api/evaluaciones', async (req, res) => {
+    const { notas, titulo } = req.body;
+
+    if (!Array.isArray(notas) || !titulo) {
+        return res.status(400).json({ ok: false, mensaje: 'Datos insuficientes' });
+    }
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        for (const item of notas) {
+            const notaValida = Math.min(Math.max(parseFloat(item.nota) || 0, 0), 100);
+
+            try {
+                const queryUpsert = `
+                    INSERT INTO evaluacion (id_inscripcion, titulo, nota, observacion)
+                    VALUES ($1, $2, $3, $4)
+                    ON CONFLICT (id_inscripcion, titulo) 
+                    DO UPDATE SET nota = EXCLUDED.nota,
+                                  observacion = EXCLUDED.observacion,
+                                  fecha = CURRENT_TIMESTAMP;
+                `;
+                await client.query(queryUpsert, [
+                    item.id_inscripcion,
+                    titulo,
+                    notaValida,
+                    item.observacion || ''
+                ]);
+            } catch (errConflict) {
+                const check = await client.query(
+                    `SELECT id_evaluacion FROM evaluacion WHERE id_inscripcion = $1 AND titulo = $2`,
+                    [item.id_inscripcion, titulo]
+                );
+
+                if (check.rows.length > 0) {
+                    await client.query(
+                        `UPDATE evaluacion
+                         SET nota = $1, observacion = $2, fecha = CURRENT_TIMESTAMP
+                         WHERE id_evaluacion = $3`,
+                        [notaValida, item.observacion || '', check.rows[0].id_evaluacion]
+                    );
+                } else {
+                    await client.query(
+                        `INSERT INTO evaluacion (id_inscripcion, titulo, nota, observacion)
+                         VALUES ($1, $2, $3, $4)`,
+                        [item.id_inscripcion, titulo, notaValida, item.observacion || '']
+                    );
+                }
+            }
+        }
+
+        await client.query('COMMIT');
+        res.json({ ok: true, mensaje: 'Notas registradas correctamente' });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error al guardar notas:', error.message);
+        res.status(500).json({ ok: false, mensaje: 'Error al guardar las notas: ' + error.message });
+    } finally {
+        client.release();
+    }
+});
+
+// BOLETÍN DE NOTAS PERSONAL (ESTUDIANTE)
+app.get('/api/mis-notas', async (req, res) => {
+    const { id_usuario, correo } = req.query;
+    try {
+        let userId = id_usuario;
+
+        if ((!userId || userId === 'undefined') && correo) {
+            const userRes = await pool.query('SELECT id_usuario FROM usuario WHERE LOWER(correo) = LOWER($1)', [correo]);
+            if (userRes.rows.length > 0) {
+                userId = userRes.rows[0].id_usuario;
+            }
+        }
+
+        const query = `
+            SELECT e.id_evaluacion, e.titulo, e.nota, e.observacion,
+                   TO_CHAR(e.fecha, 'YYYY-MM-DD') AS fecha, c.nombre_curso
+            FROM evaluacion e
+                     JOIN inscripcion i ON e.id_inscripcion = i.id_inscripcion
+                     JOIN curso c ON i.id_curso = c.id_curso
+                     JOIN usuario u ON i.id_usuario = u.id_usuario
+            WHERE u.id_usuario = $1 OR LOWER(u.correo) = LOWER($2)
+            ORDER BY c.nombre_curso ASC, e.fecha DESC;
+        `;
+        const resultado = await pool.query(query, [userId || 0, correo || '']);
+        res.json(resultado.rows);
+    } catch (error) {
+        console.error('Error al obtener mis notas:', error.message);
+        res.status(500).json({ error: 'Error al obtener notas' });
     }
 });
 
