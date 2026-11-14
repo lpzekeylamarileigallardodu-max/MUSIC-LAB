@@ -1,0 +1,25 @@
+PERFILES DE PRUEBA - ACADEMIA JAIME GALLARDO
+Contrasena de todos: clave123
+
+ADMINISTRATIVOS
+Admin (director)      admin@academiajaimegallardo.com
+Secretaria            secretaria@academiajaimegallardo.com
+Recepcion             recepcion@academiajaimegallardo.com
+
+DOCENTES
+Lucia (Guitarra)      lucia.fernandez@academiajaimegallardo.com
+Marco (Piano)         marco.vargas@academiajaimegallardo.com
+Andrea (Canto/Bat.)   andrea.salinas@academiajaimegallardo.com
+
+ESTUDIANTES
+Diego                 diego.torrez@correo.com
+Valeria               valeria.gutierrez@correo.com
+Sebastian             sebastian.flores@correo.com
+Camila                camila.rios@correo.com
+Mateo                 mateo.cussi@correo.com
+Fernanda              fernanda.ayala@correo.com
+Joaquin               joaquin.paredes@correo.com
+Daniela               daniela.bustillos@correo.com
+
+INVITADO (sin inscribir)
+Lucas                 invitado@correo.com

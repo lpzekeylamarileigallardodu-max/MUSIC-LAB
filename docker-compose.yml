@@ -1,0 +1,33 @@
+# Base de datos de la Academia Jaime Gallardo en Docker (PostgreSQL 16).
+# El backend (Spring Boot) y el frontend (React) corren en la PC con INICIAR.bat.
+#
+#   docker compose up -d       -> levanta la base en localhost:5433
+#   docker compose stop        -> la apaga (los datos se quedan en el volumen)
+#   docker compose down -v     -> la apaga y BORRA los datos (la próxima vez se vuelve a cargar el script)
+name: academia-jaime-gallardo
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: academia-jaime-gallardo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: academia_jaime_gallardo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Chinino10}
+      TZ: America/La_Paz
+      PGTZ: America/La_Paz
+    volumes:
+      - datos_db:/var/lib/postgresql/data
+      # Solo corre la primera vez (volumen vacío): crea tablas, triggers y datos de ejemplo
+      - ./database/academia_jaime_gallardo_db.sql:/docker-entrypoint-initdb.d/01_academia.sql:ro
+    ports:
+      - "5433:5432"   # 5433 para no chocar con un PostgreSQL instalado en Windows (5432)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d academia_jaime_gallardo"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  datos_db:

@@ -1,21 +1,21 @@
-<<<<<<< HEAD
-# ACADEMIA JAIME GALLARDO
-Este es el proyecto de 4° semestre, consiste en un registro de la academia de música
-=======
-# React + Vite
+# Academia Jaime Gallardo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de gestión de una academia de música: inscripciones, cuotas y pagos, horarios, asistencia, notas, material, préstamos de instrumentos y reportes en Excel.
 
-Currently, two official plugins are available:
+- **Backend:** Spring Boot 4 (Java 21), arquitectura hexagonal, JPA (sin SQL nativo), Apache POI.
+- **Frontend:** React 18 + TypeScript + Vite.
+- **Base de datos:** PostgreSQL 16 en Docker.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Cómo levantarlo
 
-## React Compiler
+1. Instalar Docker Desktop, Java 21 y Node (o doble clic en `INSTALAR_TODO.bat`, que instala lo que falte).
+2. Doble clic en `INICIAR.bat`: levanta la base en Docker (`localhost:5433`), el backend (`localhost:8080`) y el frontend (`localhost:5173`).
+3. Usuarios de prueba en `perfiles_prueba.txt` (clave `clave123`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Para comprobar que todo responde: doble clic en `PROBAR.bat` (resultado en `pruebas/probar.log`).
 
-## Expanding the ESLint configuration
+Correo de bienvenida (opcional): copiar `backend/src/main/resources/secretos.ejemplo.yaml` como `secretos.yaml` y poner la clave de aplicación de Gmail.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
->>>>>>> ef0ee47 (login1)
+## Documentación
+- `CAMBIOS_OBSERVACIONES.md`: qué se hizo por cada observación del ingeniero.
+- `CAMBIOS_PANEL_DOCENTE.md`: cambios del panel docente.

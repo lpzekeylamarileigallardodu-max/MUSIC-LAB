@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: academia
+  # Claves que no se suben a GitHub (correo). Ver secretos.ejemplo.yaml
+  config:
+    import: "optional:classpath:secretos.yaml"
+  datasource:
+    url: jdbc:postgresql://localhost:5433/academia_jaime_gallardo   # base en Docker (docker-compose.yml)
+    username: postgres
+    password: Chinino10
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 8h
+      cookie:
+        http-only: true
+        same-site: lax
+
+academia:
+  correo:
+    remitente: ${MAIL_USERNAME:}
