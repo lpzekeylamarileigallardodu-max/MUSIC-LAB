@@ -5,9 +5,9 @@ spring:
   config:
     import: "optional:classpath:secretos.yaml"
   datasource:
-    url: jdbc:postgresql://localhost:5433/academia_jaime_gallardo   # base en Docker (docker-compose.yml)
-    username: postgres
-    password: Chinino10
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/academia_jaime_gallardo}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: none
