@@ -20,7 +20,6 @@ Mateo                 mateo.cussi@correo.com
 Fernanda              fernanda.ayala@correo.com
 Joaquin               joaquin.paredes@correo.com
 Daniela               daniela.bustillos@correo.com
-Damian                damgalo09@gmail.com
 
 INVITADO (sin inscribir)
 Lucas                 invitado@correo.com

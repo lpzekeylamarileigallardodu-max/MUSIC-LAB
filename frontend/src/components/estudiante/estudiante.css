@@ -55,3 +55,19 @@
 .form-comprobante input, .form-comprobante select { padding: 10px 12px; font-size: 14px; }
 .form-comprobante .acciones-pie, .form-comprobante .notice { grid-column: 1 / -1; }
 @media (max-width: 900px) { .form-comprobante { grid-template-columns: 1fr; } }
+
+/* Pagar con QR: código a la izquierda, datos y foto del comprobante a la derecha */
+.pago-qr { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px 28px; align-items: start; }
+.pago-qr-codigo {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: #fff; color: #1c3a73;
+}
+.pago-qr-codigo img { width: 180px; height: 180px; image-rendering: pixelated; }
+.pago-qr-codigo strong { font-size: 18px; }
+.pago-qr-codigo span { font-size: 12px; color: #4a5568; line-height: 1.4; }
+.pago-qr-datos { display: flex; flex-direction: column; gap: 12px; }
+.pago-qr-datos label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; }
+.pago-qr-datos input, .pago-qr-datos select { padding: 10px 12px; font-size: 14px; }
+.pago-qr-datos input[type="file"] { padding: 8px; }
+.pago-qr-vista { max-width: 260px; max-height: 220px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); }
+@media (max-width: 700px) { .pago-qr { grid-template-columns: 1fr; } }

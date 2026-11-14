@@ -11,5 +11,14 @@ public record UsuarioAdmin(
         String telefono,
         String tipoUsuario,
         boolean activo,
-        LocalDateTime fechaRegistro) {
+        LocalDateTime fechaRegistro,
+        String nombres,
+        String apPat,
+        String apMat,
+        String direccion) {
+
+    /** Lo que se puede cambiar desde "Editar usuario" (el tipo y la contraseña no se tocan aquí). */
+    public record Datos(String nombres, String apPat, String apMat, String ci, String correo,
+                        String telefono, String direccion) {
+    }
 }

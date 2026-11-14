@@ -168,6 +168,21 @@ export interface UsuarioAdmin {
   tipoUsuario: TipoUsuario;
   activo: boolean;
   fechaRegistro: string; // ISO
+  nombres: string | null;
+  apPat: string | null;
+  apMat: string | null;
+  direccion: string | null;
+}
+
+/** Lo que se puede cambiar en "Editar usuario". */
+export interface DatosUsuario {
+  nombres: string;
+  apPat: string;
+  apMat: string;
+  ci: string;
+  correo: string;
+  telefono: string;
+  direccion: string;
 }
 
 export type EstadoClase = "PROGRAMADA" | "REALIZADA" | "CANCELADA" | "NO_ASISTIO";
@@ -230,6 +245,9 @@ export const adminResumen = () => peticion<ResumenAdmin>("GET", "/api/admin/resu
 export const adminUsuarios = () => peticion<UsuarioAdmin[]>("GET", "/api/admin/usuarios");
 export const adminCambiarEstadoUsuario = (id: number, activo: boolean) =>
   peticion<UsuarioAdmin>("PATCH", `/api/admin/usuarios/${id}/estado`, { activo });
+export const adminEditarUsuario = (id: number, datos: DatosUsuario) =>
+  peticion<UsuarioAdmin>("PUT", `/api/admin/usuarios/${id}`, datos);
+export const adminEliminarUsuario = (id: number) => peticion<void>("DELETE", `/api/admin/usuarios/${id}`);
 /** Usa el endpoint que ya existía (solo DIRECTOR y SECRETARIA). */
 export const adminPromoverAEstudiante = (id: number) =>
   peticion<{ id: number; nombre: string; correo: string; tipoUsuario: TipoUsuario }>(
@@ -651,9 +669,41 @@ export const adminAprobarPago = (idTransaccion: number, montoRecibido?: number) 
   peticion<ResultadoPago>("POST", `/api/admin/pagos/${idTransaccion}/aprobar`, { montoRecibido });
 export const adminRechazarPago = (idTransaccion: number, codigoError: string, observaciones: string | null) =>
   peticion<ResultadoPago>("POST", `/api/admin/pagos/${idTransaccion}/rechazar`, { codigoError, observaciones });
+/** Sube un archivo del material de apoyo (docente) y devuelve la ruta para guardarla en el material. */
+export async function docSubirArchivoMaterial(archivo: File): Promise<string> {
+  const datos = new FormData();
+  datos.append("archivo", archivo);
+  let r: Response;
+  try {
+    r = await fetch("/api/docente/materiales/archivo", { method: "POST", body: datos });
+  } catch {
+    throw new Error(SIN_CONEXION);
+  }
+  if (r.status === 401) throw new NoAutenticadoError();
+  const cuerpo = (await r.json().catch(() => null)) as { url?: string; mensaje?: string } | null;
+  if (!r.ok || !cuerpo?.url) throw new Error(cuerpo?.mensaje ?? "No se pudo subir el archivo");
+  return cuerpo.url;
+}
+
+/** Sube la foto del comprobante (multipart) y devuelve la URL con la que se ve. */
+export async function estSubirComprobante(imagen: File): Promise<string> {
+  const datos = new FormData();
+  datos.append("imagen", imagen);
+  let r: Response;
+  try {
+    r = await fetch("/api/estudiante/comprobantes", { method: "POST", body: datos });
+  } catch {
+    throw new Error(SIN_CONEXION);
+  }
+  if (r.status === 401) throw new NoAutenticadoError();
+  const cuerpo = (await r.json().catch(() => null)) as { url?: string; mensaje?: string } | null;
+  if (!r.ok || !cuerpo?.url) throw new Error(cuerpo?.mensaje ?? "No se pudo subir la foto");
+  return cuerpo.url;
+}
+
 export const estEnviarComprobante = (
   idCuota: number,
   metodoPago: "QR" | "TRANSFERENCIA",
-  nroComprobante: string,
-  urlComprobante: string | null,
+  nroComprobante: string | null,
+  urlComprobante: string,
 ) => peticion<ResultadoPago>("POST", `/api/estudiante/cuotas/${idCuota}/comprobante`, { metodoPago, nroComprobante, urlComprobante });

@@ -27,7 +27,7 @@ public class SecurityConfig {
     private static final String RECEPCIONISTA = "RECEPCIONISTA";
 
     /** Orígenes que pueden llamar a la API con cookies (Vite en desarrollo; en Docker todo sale por nginx). */
-    @Value("${academia.cors.origenes:http://localhost:5173}")
+    @Value("${academia.cors.origenes:http://localhost:*,http://127.0.0.1:*}")
     private List<String> origenesPermitidos;
 
     @Bean
@@ -54,13 +54,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout").permitAll()
                         .requestMatchers("/api/health", "/api/cursos").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/", "/index.html", "/assets/**", "/imagenes/**", "/favicon.ico").permitAll()
                         // Tablero de horarios: lo ven todos los administrativos; lo modifican dirección y secretaría
                         .requestMatchers(HttpMethod.GET, "/api/admin/horarios").hasAnyRole(DIRECTOR, SECRETARIA, RECEPCIONISTA)
                         .requestMatchers(HttpMethod.POST, "/api/admin/horarios/verificar").hasAnyRole(DIRECTOR, SECRETARIA, RECEPCIONISTA)
                         .requestMatchers("/api/admin/horarios/**").hasAnyRole(DIRECTOR, SECRETARIA)
                         // Panel de administración (de lo más específico a lo más general)
                         .requestMatchers(HttpMethod.PATCH, "/api/admin/usuarios/*/estado").hasRole(DIRECTOR)
+                        .requestMatchers(HttpMethod.PUT, "/api/admin/usuarios/*").hasRole(DIRECTOR)
+                        .requestMatchers(HttpMethod.DELETE, "/api/admin/usuarios/*").hasRole(DIRECTOR)
                         .requestMatchers("/api/admin/vencimientos/**").hasRole(DIRECTOR)
                         .requestMatchers("/api/admin/reportes/horarios.xlsx", "/api/admin/reportes/cursos.xlsx")
                                 .hasAnyRole(DIRECTOR, SECRETARIA, RECEPCIONISTA)
@@ -69,6 +70,8 @@ public class SecurityConfig {
                                 "/api/admin/reportes/**")
                                 .hasAnyRole(DIRECTOR, SECRETARIA)
                         .requestMatchers("/api/admin/**").hasAnyRole(DIRECTOR, SECRETARIA, RECEPCIONISTA)
+                        // Fotos de comprobantes: las ve quien verifica pagos y el estudiante que las subió
+                        .requestMatchers("/api/archivos/comprobantes/**").hasAnyRole(DIRECTOR, SECRETARIA, "ESTUDIANTE")
                         // Panel del estudiante: solo el rol ESTUDIANTE (cada consulta se filtra por su propia sesión)
                         .requestMatchers("/api/estudiante/**").hasRole("ESTUDIANTE")
                         // Panel del docente: solo el rol DOCENTE (cada operación se limita a sus propios cursos)
@@ -82,7 +85,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(origenesPermitidos);
+        config.setAllowedOriginPatterns(origenesPermitidos);   // cualquier puerto de localhost (5173, 5174...)
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

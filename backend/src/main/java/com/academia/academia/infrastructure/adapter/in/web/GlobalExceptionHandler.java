@@ -43,6 +43,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ErrorDto.de("El valor del parámetro \"" + ex.getName() + "\" no es válido"));
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorDto> archivoGrande(org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ErrorDto.de("El archivo es demasiado grande (máximo 20 MB; las fotos de comprobante, 5 MB)."));
+    }
+
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<ErrorDto> noEncontrado(RecursoNoEncontradoException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorDto.de(ex.getMessage()));

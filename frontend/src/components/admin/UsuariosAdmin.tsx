@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   adminCambiarEstadoUsuario,
+  adminEliminarUsuario,
   adminUsuarios,
   descargarReporteAdmin,
   NoAutenticadoError,
@@ -8,6 +9,7 @@ import {
   type UsuarioAdmin,
 } from "../../api";
 import BotonExcel from "../BotonExcel";
+import EditarUsuario from "./EditarUsuario";
 import Estado from "./Estado";
 import InscripcionesUsuario from "./InscripcionesUsuario";
 import { useCarga } from "./useCarga";
@@ -23,6 +25,7 @@ export default function UsuariosAdmin({ onExpira, tipoUsuario }: Props) {
   const [ocupado, setOcupado] = useState<number | null>(null);
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [inscribiendo, setInscribiendo] = useState<UsuarioAdmin | null>(null);
+  const [editando, setEditando] = useState<UsuarioAdmin | null>(null);
 
   const esDirector = tipoUsuario === "DIRECTOR";
 
@@ -59,6 +62,11 @@ export default function UsuariosAdmin({ onExpira, tipoUsuario }: Props) {
       () => adminCambiarEstadoUsuario(u.id, activar),
       activar ? `${u.nombre} fue activado.` : `${u.nombre} fue desactivado.`,
     );
+  };
+
+  const eliminar = (u: UsuarioAdmin) => {
+    if (!window.confirm(`¿Eliminar a ${u.nombre}? Esto no se puede deshacer.\n\nSi tiene inscripciones, pagos o cursos a cargo no se podrá borrar: en ese caso desactívalo.`)) return;
+    ejecutar(u, () => adminEliminarUsuario(u.id), `${u.nombre} fue eliminado.`);
   };
 
   return (
@@ -114,7 +122,22 @@ export default function UsuariosAdmin({ onExpira, tipoUsuario }: Props) {
                   <td>{u.ci}</td>
                   <td>{TIPO_LEGIBLE[u.tipoUsuario] ?? u.tipoUsuario}</td>
                   <td>
-                    <span className={u.activo ? "pill ok" : "pill off"}>{u.activo ? "Activo" : "Inactivo"}</span>
+                    {esDirector ? (
+                      <label className="interruptor" title={u.activo ? "Clic para desactivar" : "Clic para activar"}>
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          checked={u.activo}
+                          disabled={ocupado === u.id}
+                          onChange={() => cambiarActivo(u)}
+                          aria-label={`${u.activo ? "Desactivar" : "Activar"} a ${u.nombre}`}
+                        />
+                        <span className="interruptor-pista" aria-hidden="true" />
+                        <span className="interruptor-texto">{u.activo ? "Activo" : "Inactivo"}</span>
+                      </label>
+                    ) : (
+                      <span className={u.activo ? "pill ok" : "pill off"}>{u.activo ? "Activo" : "Inactivo"}</span>
+                    )}
                   </td>
                   <td>{fecha(u.fechaRegistro)}</td>
                   <td className="acciones">
@@ -124,9 +147,14 @@ export default function UsuariosAdmin({ onExpira, tipoUsuario }: Props) {
                       </button>
                     )}
                     {esDirector && (
-                      <button className="btn-ghost chico" disabled={ocupado === u.id} onClick={() => cambiarActivo(u)}>
-                        {u.activo ? "Desactivar" : "Activar"}
-                      </button>
+                      <>
+                        <button className="btn-ghost chico" disabled={ocupado === u.id} onClick={() => setEditando(u)}>
+                          Editar
+                        </button>
+                        <button className="btn-ghost chico btn-peligro" disabled={ocupado === u.id} onClick={() => eliminar(u)}>
+                          Eliminar
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>
@@ -141,6 +169,19 @@ export default function UsuariosAdmin({ onExpira, tipoUsuario }: Props) {
             </tbody>
           </table>
         </div>
+      )}
+      {editando && (
+        <EditarUsuario
+          usuario={editando}
+          onExpira={onExpira}
+          onCerrar={(guardado) => {
+            setEditando(null);
+            if (guardado) {
+              setAviso({ clase: "ok", texto: `Datos de ${guardado.nombre} guardados.` });
+              recargar();
+            }
+          }}
+        />
       )}
       {inscribiendo && (
         <InscripcionesUsuario

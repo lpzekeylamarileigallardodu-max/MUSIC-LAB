@@ -14,7 +14,7 @@ Sistema de gestión de una academia de música: inscripciones, cuotas y pagos, h
 
 Para comprobar que todo responde: doble clic en `PROBAR.bat` (resultado en `pruebas/probar.log`).
 
-Correo de bienvenida (opcional): copiar `backend/src/main/resources/secretos.ejemplo.yaml` como `secretos.yaml` y poner la clave de aplicación de Gmail.
+Correo de bienvenida (opcional): en `backend/src/main/resources/application.yaml` poner el correo de Gmail y su clave de aplicación (`spring.mail.username` / `password`).
 
 ## Documentación
 - `CAMBIOS_OBSERVACIONES.md`: qué se hizo por cada observación del ingeniero.

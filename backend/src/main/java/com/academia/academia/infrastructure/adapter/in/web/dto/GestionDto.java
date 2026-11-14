@@ -51,6 +51,6 @@ public final class GestionDto {
 
     public record ComprobanteDto(
             @NotNull(message = "Elige el método de pago") String metodoPago,
-            @NotNull(message = "Escribe el número de comprobante") @Size(max = 100) String nroComprobante,
+            @Size(max = 100) String nroComprobante,
             @Size(max = 500) String urlComprobante) {}
 }

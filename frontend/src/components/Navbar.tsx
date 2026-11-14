@@ -5,13 +5,14 @@ type Props = {
   theme: "light" | "dark";
   sesion: Sesion | null;
   /** En el panel de administración se ocultan los enlaces de la página de inicio. */
+  /** ya no cambia nada (antes ocultaba el menú de la portada); se deja para no romper a quien lo pasa */
   modoPanel?: boolean;
   onToggleTheme: () => void;
   onLogin: () => void;
   onLogout: () => void;
 };
 
-export default function Navbar({ theme, sesion, modoPanel = false, onToggleTheme, onLogin, onLogout }: Props) {
+export default function Navbar({ theme, sesion, onToggleTheme, onLogin, onLogout }: Props) {
   return (
     <header className="navbar">
       <div className="logo">
@@ -23,15 +24,6 @@ export default function Navbar({ theme, sesion, modoPanel = false, onToggleTheme
           <small>ACADEMIA DE MÚSICA</small>
         </div>
       </div>
-
-      {!modoPanel && (
-        <nav className="nav-links">
-          <a href="#cursos">Cursos</a>
-          <a href="#docentes">Docentes</a>
-          <a href="#eventos">Eventos</a>
-          <a href="#contacto">Contacto</a>
-        </nav>
-      )}
 
       <div className="nav-actions">
         <button className="theme-btn" onClick={onToggleTheme} aria-label="Cambiar tema">

@@ -4,6 +4,7 @@ import {
   docCursos,
   docEstadoMaterial,
   docMaterial,
+  docSubirArchivoMaterial,
   NoAutenticadoError,
   type MaterialDocente,
   type TipoMaterial,
@@ -30,28 +31,34 @@ export default function MaterialDoc({ onExpira }: Props) {
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [tipo, setTipo] = useState<TipoMaterial>("GUIA");
-  const [url, setUrl] = useState("");
+  const [archivo, setArchivo] = useState<File | null>(null);
+  const [claveArchivo, setClaveArchivo] = useState(0);   // para vaciar el input después de publicar
 
   const listaCursos = cursos.datos ?? [];
   const cursoElegido = idCurso ?? listaCursos.find((c) => c.activo)?.idCurso ?? listaCursos[0]?.idCurso ?? null;
 
   const agregar = async (e: FormEvent) => {
     e.preventDefault();
-    if (cursoElegido === null) return;
+    if (cursoElegido === null || !archivo) return;
+    if (archivo.size > 20 * 1024 * 1024) {
+      return setAviso({ clase: "error", texto: "El archivo pesa más de 20 MB" });
+    }
     setEnviando(true);
     setAviso(null);
     try {
+      const url = await docSubirArchivoMaterial(archivo);
       await docAgregarMaterial({
         idCurso: cursoElegido,
         titulo: titulo.trim(),
         descripcion: descripcion.trim() || null,
         tipo,
-        url: url.trim(),
+        url,
       });
       setAviso({ clase: "ok", texto: `«${titulo.trim()}» ya está disponible para los alumnos del curso.` });
       setTitulo("");
       setDescripcion("");
-      setUrl("");
+      setArchivo(null);
+      setClaveArchivo((k) => k + 1);
       material.recargar();
     } catch (err) {
       if (err instanceof NoAutenticadoError) return onExpira();
@@ -105,15 +112,18 @@ export default function MaterialDoc({ onExpira }: Props) {
               <input className="input-chico" type="text" required maxLength={150} value={titulo} onChange={(e) => setTitulo(e.target.value)} />
             </label>
             <label className="ancho-completo">
-              Enlace
+              Archivo (PDF, imagen, audio, video, Word, PowerPoint, Excel o ZIP · hasta 20 MB)
               <input
+                key={claveArchivo}
                 className="input-chico"
-                type="text"
+                type="file"
                 required
-                maxLength={500}
-                placeholder="https://… o /materiales/curso/archivo.pdf"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                accept=".pdf,.png,.jpg,.jpeg,.webp,.mp3,.wav,.ogg,.mp4,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.mid,.midi,.mscz"
+                onChange={(e) => {
+                  const f = e.target.files?.[0] ?? null;
+                  setArchivo(f);
+                  if (f && titulo.trim() === "") setTitulo(f.name.replace(/\.[^.]+$/, ""));
+                }}
               />
             </label>
             <label className="ancho-completo">
@@ -121,7 +131,7 @@ export default function MaterialDoc({ onExpira }: Props) {
               <textarea className="input-chico" rows={2} maxLength={1000} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
             </label>
             <div className="ancho-completo">
-              <button className="btn-primary" type="submit" disabled={enviando || cursoElegido === null || titulo.trim() === "" || url.trim() === ""}>
+              <button className="btn-primary" type="submit" disabled={enviando || cursoElegido === null || titulo.trim() === "" || !archivo}>
                 {enviando ? "Publicando…" : "Publicar material"}
               </button>
             </div>

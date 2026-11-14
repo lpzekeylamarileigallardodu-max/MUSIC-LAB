@@ -15,6 +15,5 @@ backend/.gradle/
 pruebas/
 backend/salida.txt
 
-# Claves (copiar secretos.ejemplo.yaml como secretos.yaml)
-backend/src/main/resources/secretos.yaml
 .env
+backend/uploads/

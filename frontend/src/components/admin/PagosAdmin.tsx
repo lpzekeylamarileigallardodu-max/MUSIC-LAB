@@ -25,6 +25,9 @@ function FilaComprobante({ p, ocupado, onAprobar, onRechazar }: {
   const [monto, setMonto] = useState(String(esperado));
   const [codigo, setCodigo] = useState("NO_ENCONTRADO_EN_BANCO");
   const [obs, setObs] = useState("");
+  const [viendoFoto, setViendoFoto] = useState(false);
+  // Las fotos subidas desde la web se sirven desde /api/archivos/...; las antiguas pueden ser enlaces externos
+  const fotoPropia = p.urlComprobante?.startsWith("/api/archivos/") ?? false;
 
   return (
     <tr>
@@ -38,8 +41,34 @@ function FilaComprobante({ p, ocupado, onAprobar, onRechazar }: {
       <td>
         {p.metodoPago}
         <div className="sub">{p.nroComprobante ?? "Sin número"}</div>
-        {p.urlComprobante && (
+        {p.urlComprobante && fotoPropia && (
+          <button type="button" className="miniatura-comprobante" onClick={() => setViendoFoto(true)} title="Ver comprobante">
+            <img src={p.urlComprobante} alt={`Comprobante de ${p.estudiante}`} loading="lazy" />
+          </button>
+        )}
+        {p.urlComprobante && !fotoPropia && (
           <a className="sub enlace" href={p.urlComprobante} target="_blank" rel="noreferrer">Ver comprobante</a>
+        )}
+        {viendoFoto && p.urlComprobante && (
+          <div className="overlay" onClick={() => setViendoFoto(false)}>
+            <div className="modal modal-foto" role="dialog" aria-modal="true" aria-label="Comprobante de pago" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Comprobante de pago</h2>
+                <p>{p.estudiante} · {p.curso} · debe {bs(esperado)}</p>
+                <button className="close-btn" onClick={() => setViendoFoto(false)} aria-label="Cerrar">✕</button>
+              </div>
+              <div className="modal-body">
+                <a href={p.urlComprobante} target="_blank" rel="noreferrer" title="Abrir en tamaño completo">
+                  <img className="foto-comprobante" src={p.urlComprobante} alt={`Comprobante de ${p.estudiante}`} />
+                </a>
+                <p className="sub">{p.metodoPago} · {p.nroComprobante ?? "Sin número"} · enviado el {fechaHora(p.fecha)}</p>
+                <div className="grupo">
+                  <button className="btn-primary" disabled={ocupado} onClick={() => { setViendoFoto(false); setModo("aprobar"); }}>Sí pagó: aprobar</button>
+                  <button className="btn-ghost btn-peligro" disabled={ocupado} onClick={() => { setViendoFoto(false); setModo("rechazar"); }}>No pagó: rechazar</button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </td>
       <td className="acciones">

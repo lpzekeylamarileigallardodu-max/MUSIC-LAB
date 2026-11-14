@@ -112,12 +112,54 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
         String rol = u.getRol().getNombreRol();
         String tipo = "ADMINISTRATIVO".equals(rol) ? (cargo != null ? cargo : rol) : rol;
         return new UsuarioAdmin(u.getId(), u.getNombreCompleto(), u.getCorreo(), u.getCi(), u.getTelefono(),
-                tipo, Boolean.TRUE.equals(u.getActivo()), u.getFechaRegistro());
+                tipo, Boolean.TRUE.equals(u.getActivo()), u.getFechaRegistro(),
+                u.getNombres(), u.getApPat(), u.getApMat(), u.getDireccion());
     }
 
     @Override
     public void actualizarActivoUsuario(Integer id, boolean activo) {
         usuarios.findById(id).ifPresent(u -> u.setActivo(activo));   // se guarda al cerrar la transacción
+    }
+
+    @Override
+    public boolean correoEnUso(String correo, Integer idExcluir) {
+        return usuarios.existsByCorreoIgnoreCaseAndIdNot(correo, idExcluir);
+    }
+
+    @Override
+    public boolean ciEnUso(String ci, Integer idExcluir) {
+        return usuarios.existsByCiAndIdNot(ci, idExcluir);
+    }
+
+    @Override
+    public void actualizarDatosUsuario(Integer id, UsuarioAdmin.Datos d) {
+        usuarios.findById(id).ifPresent(u -> {
+            u.setNombres(d.nombres());
+            u.setApPat(d.apPat());
+            u.setApMat(d.apMat());
+            u.setNombreCompleto(String.join(" ",
+                    java.util.stream.Stream.of(d.nombres(), d.apPat(), d.apMat()).filter(x -> x != null && !x.isBlank()).toList()));
+            u.setCi(d.ci());
+            u.setCorreo(d.correo());
+            u.setTelefono(d.telefono());
+            u.setDireccion(d.direccion());
+        });   // se guarda al cerrar la transacción
+    }
+
+    /**
+     * Borra el usuario (sus filas de estudiante/docente/administrativo se borran solas por ON DELETE CASCADE).
+     * Si tiene historial (inscripciones, pagos, cursos a cargo, préstamos, eventos), la base lo impide con
+     * ON DELETE RESTRICT: se traduce a un mensaje claro para que lo desactive en vez de borrarlo.
+     */
+    @Override
+    public void eliminarUsuario(Integer id) {
+        try {
+            usuarios.deleteById(id);
+            usuarios.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new com.academia.academia.domain.exception.ReglaDeNegocioException(
+                    "No se puede eliminar: el usuario tiene historial (inscripciones, pagos, cursos o préstamos). Desactívalo en su lugar.");
+        }
     }
 
     // ---------------- Clases de prueba ----------------

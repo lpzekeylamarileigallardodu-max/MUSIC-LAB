@@ -19,6 +19,10 @@ public interface SpringDataUsuarioRepository extends JpaRepository<UsuarioJpaEnt
 
     boolean existsByCi(String ci);
 
+    boolean existsByCorreoIgnoreCaseAndIdNot(String correo, Integer id);
+
+    boolean existsByCiAndIdNot(String ci, Integer id);
+
     /** Usuarios activos agrupados por rol: [nombreRol, cantidad]. */
     @Query("select u.rol.nombreRol, count(u) from UsuarioJpaEntity u where u.activo = true group by u.rol.nombreRol")
     List<Object[]> contarActivosPorRol();

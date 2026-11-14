@@ -16,6 +16,7 @@ import com.academia.academia.domain.model.Gestion.ResultadoVencimientos;
 import com.academia.academia.domain.model.Gestion.TransaccionInfo;
 import com.academia.academia.domain.model.TipoUsuario;
 import com.academia.academia.domain.model.Usuario;
+import com.academia.academia.domain.port.in.ComprobantesCasosDeUso;
 import com.academia.academia.domain.port.in.GestionAcademicaCasosDeUso;
 import com.academia.academia.domain.port.out.EstudianteRepositorioPuerto;
 import com.academia.academia.domain.port.out.GestionAcademicaPuerto;
@@ -245,16 +246,20 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
         if (metodo == null || !METODOS_ESTUDIANTE.contains(metodo)) {
             throw new ReglaDeNegocioException("Método de pago no válido. Usa QR o TRANSFERENCIA");
         }
+        // La foto del comprobante se sube antes (POST /api/estudiante/comprobantes) y aquí llega su URL
+        String url = limpiar(c.urlComprobante());
+        if (url == null || !url.matches(java.util.regex.Pattern.quote(ComprobantesCasosDeUso.RUTA) + "[0-9a-f-]{36}\\.(png|jpg|webp)")) {
+            throw new ReglaDeNegocioException("Sube la foto del comprobante");
+        }
+        // El n.º de operación es opcional: si no lo escribe, se genera uno para identificar el pago
         String nro = limpiar(c.nroComprobante());
-        if (nro == null || nro.length() < 4 || nro.length() > 100) {
-            throw new ReglaDeNegocioException("Escribe el número de operación del comprobante (entre 4 y 100 caracteres)");
+        if (nro == null) {
+            nro = "FOTO-" + idCuota + "-" + System.currentTimeMillis();
+        } else if (nro.length() < 4 || nro.length() > 100) {
+            throw new ReglaDeNegocioException("El número de operación debe tener entre 4 y 100 caracteres");
         }
         if (gestion.existeComprobante(nro)) {
             throw new ReglaDeNegocioException("Ese número de comprobante ya fue registrado");
-        }
-        String url = limpiar(c.urlComprobante());
-        if (url != null && !(url.toLowerCase(Locale.ROOT).startsWith("https://") || url.toLowerCase(Locale.ROOT).startsWith("http://"))) {
-            throw new ReglaDeNegocioException("El enlace del comprobante debe empezar con https://");
         }
 
         Integer idT = gestion.registrarTransaccion(idCuota, metodo, "PENDIENTE", nro, url, null, null);

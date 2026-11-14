@@ -1,5 +1,5 @@
-import { Fragment, useState, type FormEvent } from "react";
-import { NoAutenticadoError, estCuotas, estEnviarComprobante, type CuotaEstudiante, type EstadoCuota } from "../../api";
+import { Fragment, useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { NoAutenticadoError, estCuotas, estEnviarComprobante, estSubirComprobante, type CuotaEstudiante, type EstadoCuota } from "../../api";
 import Estado from "../admin/Estado";
 import { useCarga } from "../admin/useCarga";
 import { bs, fecha, nombreMes } from "../admin/util";
@@ -13,7 +13,7 @@ const ESTADO: Record<EstadoCuota, { texto: string; clase: string }> = {
   ANULADA: { texto: "Anulada", clase: "pill off" },
 };
 
-/** Formulario para informar que se pagó una cuota por QR o transferencia. */
+/** Pagar una cuota: muestra el QR de la academia y pide la foto del comprobante. */
 function FormComprobante({ cuota, onEnviado, onCancelar, onExpira }: {
   cuota: CuotaEstudiante;
   onEnviado: (texto: string) => void;
@@ -22,16 +22,41 @@ function FormComprobante({ cuota, onEnviado, onCancelar, onExpira }: {
 }) {
   const [metodo, setMetodo] = useState<"QR" | "TRANSFERENCIA">("QR");
   const [nro, setNro] = useState("");
-  const [url, setUrl] = useState("");
+  const [foto, setFoto] = useState<File | null>(null);
+  const [vista, setVista] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Vista previa de la foto elegida (se libera al cambiarla o al cerrar)
+  useEffect(() => {
+    if (!foto) return setVista(null);
+    const url = URL.createObjectURL(foto);
+    setVista(url);
+    return () => URL.revokeObjectURL(url);
+  }, [foto]);
+
+  const elegir = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    setError(null);
+    if (f && !["image/png", "image/jpeg", "image/webp"].includes(f.type)) {
+      setError("La foto debe ser PNG, JPG o WEBP");
+      return setFoto(null);
+    }
+    if (f && f.size > 5 * 1024 * 1024) {
+      setError("La foto pesa más de 5 MB. Toma una captura o redúcela.");
+      return setFoto(null);
+    }
+    setFoto(f);
+  };
+
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
+    if (!foto) return setError("Sube la foto del comprobante");
     setEnviando(true);
     setError(null);
     try {
-      await estEnviarComprobante(cuota.idCuota, metodo, nro.trim(), url.trim() || null);
+      const url = await estSubirComprobante(foto);
+      await estEnviarComprobante(cuota.idCuota, metodo, nro.trim() || null, url);
       onEnviado(`Comprobante enviado. Secretaría lo revisará y la cuota de ${nombreMes(cuota.mes)} quedará pagada.`);
     } catch (err) {
       if (err instanceof NoAutenticadoError) return onExpira();
@@ -42,27 +67,35 @@ function FormComprobante({ cuota, onEnviado, onCancelar, onExpira }: {
   };
 
   return (
-    <form className="form-comprobante" onSubmit={enviar}>
-      <label>
-        MÉTODO
-        <select value={metodo} onChange={(e) => setMetodo(e.target.value as "QR" | "TRANSFERENCIA")}>
-          <option value="QR">QR de la academia</option>
-          <option value="TRANSFERENCIA">Transferencia bancaria</option>
-        </select>
-      </label>
-      <label>
-        N.º DE OPERACIÓN DEL COMPROBANTE
-        <input value={nro} onChange={(e) => setNro(e.target.value)} placeholder="Ej.: QR-20261113-0001" required minLength={4} maxLength={100} autoFocus />
-      </label>
-      <label>
-        ENLACE A LA FOTO (OPCIONAL)
-        <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" maxLength={500} />
-      </label>
-      <div className="acciones-pie">
-        <button className="btn-primary" type="submit" disabled={enviando}>{enviando ? "Enviando…" : `Enviar (${bs(cuota.monto)})`}</button>
-        <button className="btn-ghost" type="button" onClick={onCancelar}>Cancelar</button>
+    <form className="pago-qr" onSubmit={enviar}>
+      <div className="pago-qr-codigo">
+        <img src="/qr-pago.png" alt="Código QR de pago de la academia" width={180} height={180} />
+        <strong>{bs(cuota.monto)}</strong>
+        <span>Escanéalo con la app de tu banco y en la glosa pon tu nombre o CI.</span>
       </div>
-      {error && <p className="notice error">{error}</p>}
+      <div className="pago-qr-datos">
+        <label>
+          MÉTODO
+          <select value={metodo} onChange={(e) => setMetodo(e.target.value as "QR" | "TRANSFERENCIA")}>
+            <option value="QR">QR de la academia</option>
+            <option value="TRANSFERENCIA">Transferencia bancaria</option>
+          </select>
+        </label>
+        <label>
+          FOTO DEL COMPROBANTE
+          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={elegir} required />
+        </label>
+        {vista && <img className="pago-qr-vista" src={vista} alt="Vista previa del comprobante" />}
+        <label>
+          N.º DE OPERACIÓN (OPCIONAL)
+          <input value={nro} onChange={(e) => setNro(e.target.value)} placeholder="Ej.: QR-20261113-0001" maxLength={100} />
+        </label>
+        <div className="acciones-pie">
+          <button className="btn-primary" type="submit" disabled={enviando || !foto}>{enviando ? "Enviando…" : `Enviar comprobante (${bs(cuota.monto)})`}</button>
+          <button className="btn-ghost" type="button" onClick={onCancelar}>Cancelar</button>
+        </div>
+        {error && <p className="notice error">{error}</p>}
+      </div>
     </form>
   );
 }
@@ -80,8 +113,8 @@ export default function PagosEst({ onExpira }: Props) {
   return (
     <>
       <p className="notice info">
-        Para pagar, escanea el QR de la academia (o haz una transferencia) y luego usa <strong>Informar pago</strong> con el
-        número de operación. Secretaría lo verifica y la cuota pasa a pagada. También puedes pagar en efectivo en ventanilla.
+        Para pagar, usa <strong>Pagar con QR</strong> en la cuota: escanea el código, paga desde tu banco y sube la foto del
+        comprobante. Secretaría lo revisa y la cuota pasa a pagada. También puedes pagar en efectivo en ventanilla.
       </p>
       {aviso && <p className="notice ok" role="status" style={{ marginTop: 12 }}>{aviso}</p>}
 
@@ -125,7 +158,7 @@ export default function PagosEst({ onExpira }: Props) {
                       <td className="acciones">
                         {pagable && abierta !== c.idCuota && (
                           <button className="btn-ghost chico" onClick={() => { setAbierta(c.idCuota); setAviso(null); }}>
-                            Informar pago
+                            Pagar con QR
                           </button>
                         )}
                       </td>

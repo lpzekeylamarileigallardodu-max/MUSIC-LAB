@@ -1,13 +1,14 @@
 spring:
   application:
     name: academia
-  # Claves que no se suben a GitHub (correo). Ver secretos.ejemplo.yaml
-  config:
-    import: "optional:classpath:secretos.yaml"
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/academia_jaime_gallardo}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:}
+    url: jdbc:postgresql://localhost:5433/academia_jaime_gallardo   # base en Docker (docker-compose.yml)
+    username: postgres
+    password: Chinino10
+  servlet:
+    multipart:
+      max-file-size: 20MB     # comprobantes (máx. 5 MB, se revisa aparte) y material de apoyo
+      max-request-size: 21MB
   jpa:
     hibernate:
       ddl-auto: none
@@ -15,8 +16,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
+    username: ${MAIL_USERNAME:}   # correo de Gmail que envía los avisos (escríbelo aquí)
+    password: ${MAIL_PASSWORD:}   # contraseña de aplicación de Gmail (no la normal)
     properties:
       mail:
         smtp:
@@ -28,8 +29,7 @@ spring:
           writetimeout: 5000
 
 server:
-  port: ${PORT:8080}
-  forward-headers-strategy: framework
+  port: 8080
   servlet:
     session:
       timeout: 8h
@@ -38,5 +38,7 @@ server:
         same-site: lax
 
 academia:
+  archivos:
+    directorio: uploads       # aquí se guardan las fotos de los comprobantes (backend/uploads/comprobantes)
   correo:
     remitente: ${MAIL_USERNAME:}

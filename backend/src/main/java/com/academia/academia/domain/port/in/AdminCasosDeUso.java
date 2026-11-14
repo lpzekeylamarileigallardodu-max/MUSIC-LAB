@@ -23,6 +23,15 @@ public interface AdminCasosDeUso {
      */
     UsuarioAdmin cambiarEstadoUsuario(Integer idUsuario, boolean activo, String correoActor, String ip);
 
+    /** Cambia nombre, CI, correo, teléfono y dirección. Revisa que el correo y el CI no los use otro usuario. */
+    UsuarioAdmin editarUsuario(Integer idUsuario, UsuarioAdmin.Datos datos, String correoActor, String ip);
+
+    /**
+     * Elimina un usuario sin historial. Si tiene inscripciones, pagos, cursos a cargo, etc.,
+     * no se puede borrar (se pierde información): en ese caso se avisa que lo desactive.
+     */
+    void eliminarUsuario(Integer idUsuario, String correoActor, String ip);
+
     List<ClasePruebaAdmin> listarClasesPrueba();
 
     /** estado: PROGRAMADA, REALIZADA, CANCELADA o NO_ASISTIO. */

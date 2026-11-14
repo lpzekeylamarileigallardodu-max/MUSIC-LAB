@@ -8,11 +8,15 @@ import com.academia.academia.domain.model.ResumenAdmin;
 import com.academia.academia.domain.model.UsuarioAdmin;
 import com.academia.academia.domain.port.in.AdminCasosDeUso;
 import com.academia.academia.infrastructure.adapter.in.web.dto.EstadoClaseDto;
+import com.academia.academia.infrastructure.adapter.in.web.dto.EditarUsuarioDto;
 import com.academia.academia.infrastructure.adapter.in.web.dto.EstadoUsuarioDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,6 +57,24 @@ public class AdminController {
                                              Authentication authentication,
                                              HttpServletRequest request) {
         return admin.cambiarEstadoUsuario(id, dto.activo(), authentication.getName(), request.getRemoteAddr());
+    }
+
+    @PutMapping("/usuarios/{id}")
+    public UsuarioAdmin editarUsuario(@PathVariable Integer id,
+                                      @RequestBody EditarUsuarioDto dto,
+                                      Authentication authentication,
+                                      HttpServletRequest request) {
+        return admin.editarUsuario(id,
+                new UsuarioAdmin.Datos(dto.nombres(), dto.apPat(), dto.apMat(), dto.ci(), dto.correo(), dto.telefono(), dto.direccion()),
+                authentication.getName(), request.getRemoteAddr());
+    }
+
+    @DeleteMapping("/usuarios/{id}")
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable Integer id,
+                                                Authentication authentication,
+                                                HttpServletRequest request) {
+        admin.eliminarUsuario(id, authentication.getName(), request.getRemoteAddr());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/clases-prueba")

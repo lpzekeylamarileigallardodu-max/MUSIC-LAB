@@ -66,11 +66,29 @@ docker compose up -d      # o doble clic en INICIAR.bat, que la levanta solo
 - La base se carga sola con `database/academia_jaime_gallardo_db.sql` la primera vez.
 - `INICIAR.bat` levanta el contenedor, espera a que la base responda y arranca backend (8080) y frontend (5173).
 - `docker compose down -v` borra la base para empezar de cero.
-- La clave de Gmail ya no está en `application.yaml`: va en `backend/src/main/resources/secretos.yaml` (no se sube a GitHub; ver `secretos.ejemplo.yaml`).
+- Toda la configuración está en un solo archivo: `backend/src/main/resources/application.yaml` (base, correo, subida de archivos).
 
 ## 6. Arreglos
 - En celular el panel se salía de la pantalla (el menú horizontal estiraba la página). Corregido en `admin.css`.
 - Errores de los triggers de PostgreSQL ahora llegan al usuario como mensaje claro (409) en vez de error 500.
+
+## 7. Correcciones del grupo
+**Usuarios (Panel → Usuarios)**
+- Activar/desactivar ahora es un **interruptor** en la columna Estado (verde = activo). Solo el director lo mueve.
+- **Editar**: ventana con nombres, apellidos, CI, correo, teléfono y dirección. Revisa formato y que el correo y el CI no los use otro usuario.
+- **Eliminar**: pide confirmación. Si el usuario tiene historial (inscripciones, pagos, cursos a cargo, préstamos) la base no deja borrarlo y se avisa que lo desactive. Nadie puede eliminarse a sí mismo.
+- Archivos: `UsuariosAdmin.tsx`, `EditarUsuario.tsx`, `AdminServiceImpl.java` (editarUsuario, eliminarUsuario), `AdminRepositorioAdapter.java`, `AdminController.java` (PUT y DELETE).
+
+**Pago con QR y foto del comprobante (estudiante → Pagos y cuotas → Pagar con QR)**
+- Se muestra el **QR de la academia** (`frontend/public/qr-pago.png`: es de ejemplo, reemplazarlo por el QR real del banco con el mismo nombre).
+- El estudiante **sube la foto del comprobante** (PNG, JPG o WEBP, hasta 5 MB) y ve la vista previa. El n.º de operación es opcional.
+- El backend revisa que de verdad sea una imagen (por sus primeros bytes, no por el nombre) y la guarda en `backend/uploads/comprobantes` con un nombre aleatorio.
+- Secretaría/dirección ve la **miniatura** en Pagos; al hacer clic se abre grande con **"Sí pagó: aprobar"** o **"No pagó: rechazar"**.
+- Solo dirección, secretaría y estudiantes pueden abrir las fotos (los docentes no).
+- Archivos: `PagosEst.tsx`, `PagosAdmin.tsx`, `api.ts` (estSubirComprobante), `ComprobanteController.java`, `ComprobantesServiceImpl.java`, `AlmacenLocalAdapter.java`, `GestionAcademicaServiceImpl.java` (enviarComprobante).
+
+**Portada**
+- Se quitó el menú de arriba (Cursos, Docentes, Eventos, Contacto) porque esos enlaces no llevaban a ninguna parte. Archivo: `Navbar.tsx`.
 
 ## Endpoints nuevos
 | Método | Ruta | Quién |
@@ -90,3 +108,6 @@ docker compose up -d      # o doble clic en INICIAR.bat, que la levanta solo
 | GET | /api/docente/horario · /api/docente/cursos/{id}/reporte.xlsx | docente |
 | GET | /api/estudiante/horario · /api/estudiante/reporte.xlsx | estudiante |
 | POST | /api/estudiante/cuotas/{id}/comprobante | estudiante |
+| PUT · DELETE | /api/admin/usuarios/{id} | director |
+| POST | /api/estudiante/comprobantes (foto, multipart) | estudiante |
+| GET | /api/archivos/comprobantes/{nombre} | dir./secr./estudiante |
