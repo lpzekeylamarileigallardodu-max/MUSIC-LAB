@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout").permitAll()
                         .requestMatchers("/api/health", "/api/cursos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/", "/index.html", "/assets/**", "/imagenes/**", "/favicon.ico").permitAll()
                         // Tablero de horarios: lo ven todos los administrativos; lo modifican dirección y secretaría
                         .requestMatchers(HttpMethod.GET, "/api/admin/horarios").hasAnyRole(DIRECTOR, SECRETARIA, RECEPCIONISTA)
                         .requestMatchers(HttpMethod.POST, "/api/admin/horarios/verificar").hasAnyRole(DIRECTOR, SECRETARIA, RECEPCIONISTA)

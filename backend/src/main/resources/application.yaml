@@ -28,7 +28,8 @@ spring:
           writetimeout: 5000
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
   servlet:
     session:
       timeout: 8h
