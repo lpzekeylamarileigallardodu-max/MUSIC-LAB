@@ -18,7 +18,6 @@ public class PagoJpaEntity {
     @Column(name = "id_pago")
     private Integer id;
 
-    /** Estudiante que paga (pago.id_usuario). */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_usuario", nullable = false)
     private UsuarioJpaEntity estudiante;
@@ -27,7 +26,6 @@ public class PagoJpaEntity {
     @JoinColumn(name = "id_inscripcion", nullable = false)
     private InscripcionJpaEntity inscripcion;
 
-    /** Cuota que cubre este pago (puede ser null en pagos antiguos). */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cuota")
     private CuotaJpaEntity cuota;

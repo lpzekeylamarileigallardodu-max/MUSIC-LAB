@@ -18,7 +18,6 @@ public interface SpringDataDocenteRepository extends JpaRepository<DocenteJpaEnt
             where u.id = d.idUsuario and lower(u.correo) = lower(:correo) and u.activo = true""")
     Optional<Integer> buscarIdActivoPorCorreo(@Param("correo") String correo);
 
-    /** Docentes activos con su nombre: [id, nombreCompleto]. */
     @Query("""
             select u.id, u.nombreCompleto from DocenteJpaEntity d, UsuarioJpaEntity u
             where u.id = d.idUsuario and u.activo = true order by u.nombreCompleto""")

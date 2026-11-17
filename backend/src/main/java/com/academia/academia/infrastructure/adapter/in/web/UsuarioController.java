@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Gestión de usuarios. Solo para DIRECTOR y SECRETARIA (ver SecurityConfig). */
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
@@ -19,7 +18,6 @@ public class UsuarioController {
         this.gestionUsuarios = gestionUsuarios;
     }
 
-    /** Pasa a un invitado a estudiante. Más adelante lo llamará la inscripción a un curso. */
     @PostMapping("/{id}/promover-estudiante")
     public UsuarioRespuestaDto promoverAEstudiante(@PathVariable Integer id) {
         Usuario usuario = gestionUsuarios.promoverAEstudiante(id);

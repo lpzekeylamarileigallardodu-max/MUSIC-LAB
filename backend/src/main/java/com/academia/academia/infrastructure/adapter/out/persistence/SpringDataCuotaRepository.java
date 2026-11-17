@@ -18,7 +18,6 @@ public interface SpringDataCuotaRepository extends JpaRepository<CuotaJpaEntity,
             where q.estado = 'VENCIDA' or (q.estado = 'PENDIENTE' and q.fechaVencimiento < :hoy)""")
     long contarVencidas(@Param("hoy") LocalDate hoy);
 
-    /** Cuotas vencidas (o pendientes con la fecha pasada) con estudiante y curso cargados. */
     @Query("""
             select q from CuotaJpaEntity q join fetch q.inscripcion i join fetch i.estudiante u join fetch i.curso
             where q.estado = 'VENCIDA' or (q.estado = 'PENDIENTE' and q.fechaVencimiento < :hoy)
@@ -49,7 +48,6 @@ public interface SpringDataCuotaRepository extends JpaRepository<CuotaJpaEntity,
 
     boolean existsByInscripcionIdAndMesAndAnio(Integer idInscripcion, Short mes, Short anio);
 
-    /** Cuotas PENDIENTE cuya fecha ya pasó: la tarea programada las marca como VENCIDA. */
     @Query("select q from CuotaJpaEntity q where q.estado = 'PENDIENTE' and q.fechaVencimiento < :hoy")
     List<CuotaJpaEntity> pendientesVencidas(@Param("hoy") LocalDate hoy);
 

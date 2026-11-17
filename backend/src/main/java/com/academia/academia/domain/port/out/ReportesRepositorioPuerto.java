@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** Listados completos para los reportes (sin filtros de pantalla). */
 public interface ReportesRepositorioPuerto {
 
     record CuotaFila(String estudiante, String ci, String telefono, String curso, int mes, int anio,
@@ -18,7 +17,6 @@ public interface ReportesRepositorioPuerto {
     record InscripcionFila(String curso, String docente, String estudiante, String correo, String estado,
                            LocalDateTime fecha) {}
 
-    /** Una marca de asistencia de un alumno de un curso. */
     record AsistenciaFila(Integer idInscripcion, String alumno, LocalDate fecha, String estado) {}
 
     List<CuotaFila> cuotas();
@@ -29,6 +27,5 @@ public interface ReportesRepositorioPuerto {
 
     List<AsistenciaFila> asistenciaDeCurso(Integer idCurso);
 
-    /** Nombre del curso (para el título del reporte). */
     String nombreCurso(Integer idCurso);
 }

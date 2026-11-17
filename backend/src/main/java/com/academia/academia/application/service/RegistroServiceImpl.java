@@ -64,13 +64,11 @@ public class RegistroServiceImpl implements RegistroCasosDeUso {
 
         Usuario guardado = usuarioRepositorio.guardarInvitado(usuario);
 
-        // Se envía después de guardar; si el correo falla, el registro igual queda hecho
         notificador.enviarBienvenida(guardado.getNombres(), guardado.getCorreo());
 
         return guardado;
     }
 
-    /** Quita espacios y convierte texto vacío en null (la base acepta NULL, no cadenas vacías en teléfono). */
     private String limpiar(String texto) {
         if (texto == null || texto.isBlank()) {
             return null;

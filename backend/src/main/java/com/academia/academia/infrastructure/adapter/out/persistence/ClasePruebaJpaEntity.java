@@ -33,7 +33,6 @@ public class ClasePruebaJpaEntity {
     @Column(name = "observaciones")
     private String observaciones;
 
-    // Administrativo que la registró. Queda NULL cuando la solicitud viene de la web.
     @Column(name = "id_usuario_registro")
     private Integer idUsuarioRegistro;
 

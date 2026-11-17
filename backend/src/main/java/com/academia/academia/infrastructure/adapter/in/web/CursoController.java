@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Lista pública de cursos (sirve para llenar los selectores de la página de inicio). */
 @RestController
 @RequestMapping("/api/cursos")
 public class CursoController {

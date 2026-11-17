@@ -17,7 +17,6 @@ public interface SpringDataInscripcionRepository extends JpaRepository<Inscripci
 
     Optional<InscripcionJpaEntity> findByEstudianteIdAndCursoId(Integer idEstudiante, Integer idCurso);
 
-    /** Inscritos activos por curso: [idCurso, cantidad]. */
     @Query("select i.curso.id, count(i) from InscripcionJpaEntity i where i.estado = 'ACTIVA' group by i.curso.id")
     List<Object[]> contarActivasPorCurso();
 
@@ -26,13 +25,11 @@ public interface SpringDataInscripcionRepository extends JpaRepository<Inscripci
             where i.curso.docente.id = :idDocente and i.curso.activo = true and i.estado = 'ACTIVA'""")
     long contarAlumnosDeDocente(@Param("idDocente") Integer idDocente);
 
-    /** Inscripciones ACTIVA de un curso, con el estudiante cargado y ordenadas por nombre. */
     @Query("""
             select i from InscripcionJpaEntity i join fetch i.estudiante u
             where i.curso.id = :idCurso and i.estado = 'ACTIVA' order by u.nombreCompleto""")
     List<InscripcionJpaEntity> activasDeCurso(@Param("idCurso") Integer idCurso);
 
-    /** Todas las inscripciones de un estudiante, con el curso y su docente cargados. */
     @Query("""
             select i from InscripcionJpaEntity i join fetch i.curso c join fetch c.docente
             where i.estudiante.id = :idEstudiante""")
@@ -40,7 +37,6 @@ public interface SpringDataInscripcionRepository extends JpaRepository<Inscripci
 
     long countByEstudianteIdAndEstado(Integer idEstudiante, String estado);
 
-    /** Inscripciones activas de cursos activos (para generar las cuotas del mes). */
     @Query("select i from InscripcionJpaEntity i join fetch i.curso c where i.estado = 'ACTIVA' and c.activo = true")
     List<InscripcionJpaEntity> activasDeCursosActivos();
 

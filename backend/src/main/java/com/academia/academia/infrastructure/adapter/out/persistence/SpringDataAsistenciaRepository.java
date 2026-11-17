@@ -15,14 +15,12 @@ public interface SpringDataAsistenciaRepository extends JpaRepository<Asistencia
 
     Optional<AsistenciaJpaEntity> findByInscripcionIdAndFecha(Integer idInscripcion, LocalDate fecha);
 
-    /** Estados de asistencia de todos los cursos de un docente. */
     @Query("select a.estado from AsistenciaJpaEntity a where a.inscripcion.curso.docente.id = :idDocente")
     List<String> estadosDeDocente(@Param("idDocente") Integer idDocente);
 
     @Query("select a.estado from AsistenciaJpaEntity a where a.inscripcion.estudiante.id = :idEstudiante")
     List<String> estadosDeEstudiante(@Param("idEstudiante") Integer idEstudiante);
 
-    /** [idInscripcion, estado] de las inscripciones dadas. */
     @Query("select a.inscripcion.id, a.estado from AsistenciaJpaEntity a where a.inscripcion.id in :inscripciones")
     List<Object[]> estadosDeInscripciones(@Param("inscripciones") Collection<Integer> inscripciones);
 

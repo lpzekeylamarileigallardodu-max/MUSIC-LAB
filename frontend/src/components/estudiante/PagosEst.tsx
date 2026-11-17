@@ -13,7 +13,6 @@ const ESTADO: Record<EstadoCuota, { texto: string; clase: string }> = {
   ANULADA: { texto: "Anulada", clase: "pill off" },
 };
 
-/** Pagar una cuota: muestra el QR de la academia y pide la foto del comprobante. */
 function FormComprobante({ cuota, onEnviado, onCancelar, onExpira }: {
   cuota: CuotaEstudiante;
   onEnviado: (texto: string) => void;
@@ -27,7 +26,6 @@ function FormComprobante({ cuota, onEnviado, onCancelar, onExpira }: {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Vista previa de la foto elegida (se libera al cambiarla o al cerrar)
   useEffect(() => {
     if (!foto) return setVista(null);
     const url = URL.createObjectURL(foto);

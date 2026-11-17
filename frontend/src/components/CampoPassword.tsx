@@ -8,7 +8,6 @@ type Props = {
   maxLength?: number;
 };
 
-/** Campo de contraseña con botón de ojo para mostrar u ocultar lo escrito. */
 export default function CampoPassword({ name, placeholder, minLength, maxLength }: Props) {
   const [visible, setVisible] = useState(false);
 

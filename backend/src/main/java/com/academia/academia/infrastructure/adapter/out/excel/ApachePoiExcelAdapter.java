@@ -37,11 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Genera los reportes .xlsx con Apache POI. Cada hoja lleva título, subtítulo, encabezado con filtro,
- * paneles inmovilizados, formatos de número/fecha/dinero y, si se pide, una fila de totales con fórmulas SUM.
- * Las hojas tipo "cuadrícula" (horarios) pintan cada curso de un color y combinan sus celdas.
- */
 @Component
 public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
 
@@ -49,7 +44,6 @@ public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
     private static final int FILA_SUBTITULO = 1;
     private static final int FILA_ENCABEZADO = 3;
 
-    /** Colores suaves para los cursos en la cuadrícula de horarios. */
     private static final int[][] PALETA = {
             {0xDB, 0xEA, 0xFE}, {0xDC, 0xFC, 0xE7}, {0xFE, 0xF3, 0xC7}, {0xFC, 0xE7, 0xF3},
             {0xED, 0xE9, 0xFE}, {0xCF, 0xFA, 0xFE}, {0xFF, 0xED, 0xD5}, {0xEC, 0xFC, 0xCB}};
@@ -76,7 +70,6 @@ public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
         List<Columna> columnas = hoja.columnas();
         int ultimaColumna = Math.max(columnas.size() - 1, 0);
 
-        // Título y subtítulo
         Cell celdaTitulo = sheet.createRow(FILA_TITULO).createCell(0);
         celdaTitulo.setCellValue(titulo + " — " + hoja.nombre());
         celdaTitulo.setCellStyle(estilos.titulo);
@@ -89,7 +82,6 @@ public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
             sheet.addMergedRegion(new CellRangeAddress(FILA_SUBTITULO, FILA_SUBTITULO, 0, ultimaColumna));
         }
 
-        // Encabezado
         Row encabezado = sheet.createRow(FILA_ENCABEZADO);
         encabezado.setHeightInPoints(22);
         for (int c = 0; c < columnas.size(); c++) {
@@ -144,7 +136,6 @@ public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
         }
     }
 
-    /** Cuadrícula de horarios: celdas con texto coloreadas por curso y combinadas cuando el bloque sigue. */
     private void escribirCuadricula(Sheet sheet, Hoja hoja, Estilos estilos) {
         List<Columna> columnas = hoja.columnas();
         List<List<Object>> filas = hoja.filas();
@@ -168,7 +159,6 @@ public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
             }
         }
 
-        // Combinar en vertical las celdas iguales consecutivas (un bloque de 90 min ocupa 3 filas)
         for (int c = 1; c < columnas.size(); c++) {
             int inicio = 0;
             while (inicio < filas.size()) {
@@ -208,7 +198,6 @@ public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
         }
     }
 
-    /** Excel limita el nombre de la hoja a 31 caracteres, sin ciertos símbolos y sin repetir. */
     private static String nombreUnico(String nombre, Set<String> usados) {
         String base = WorkbookUtil.createSafeSheetName(nombre == null || nombre.isBlank() ? "Hoja" : nombre);
         String candidato = base;
@@ -219,8 +208,6 @@ public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
         }
         return candidato;
     }
-
-    // ---------------- Estilos (se crean una sola vez por libro) ----------------
 
     private static final class Estilos {
 
@@ -292,7 +279,6 @@ public class ApachePoiExcelAdapter implements GeneradorExcelPuerto {
             return totales.get(tipo);
         }
 
-        /** El mismo curso siempre recibe el mismo color. */
         CellStyle bloque(String curso) {
             return bloques.computeIfAbsent(curso, k -> {
                 int[] rgb = PALETA[Math.floorMod(k.hashCode(), PALETA.length)];

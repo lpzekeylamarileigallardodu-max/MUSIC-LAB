@@ -39,7 +39,6 @@ public class EventoJpaEntity {
     @Column(name = "lugar_externo")
     private String lugarExterno;
 
-    /** PENDIENTE, APROBADO, REALIZADO o CANCELADO. */
     @Column(name = "estado_evento", nullable = false)
     private String estado;
 

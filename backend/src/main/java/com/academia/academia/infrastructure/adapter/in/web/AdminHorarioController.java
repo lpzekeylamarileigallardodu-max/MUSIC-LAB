@@ -18,10 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Tablero de horarios (bloques que se arrastran). Ver: todo el personal administrativo.
- * Crear, mover, duplicar, editar, activar/desactivar y eliminar: DIRECTOR y SECRETARIA (ver SecurityConfig).
- */
 @RestController
 @RequestMapping("/api/admin/horarios")
 public class AdminHorarioController {

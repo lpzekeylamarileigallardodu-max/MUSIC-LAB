@@ -9,7 +9,6 @@ type Props = { onExpira: () => void; irA: (s: SeccionDoc) => void };
 
 type Aviso = { texto: string; destino: SeccionDoc; accion: string; urgente: boolean };
 
-/** "Hoy", "Mañana" o el día de la semana. */
 function etiquetaDia(fecha: string, dia: string): string {
   const hoyD = diaDeFecha(hoy());
   const dif = Math.round((diaDeFecha(fecha).getTime() - hoyD.getTime()) / 86_400_000);

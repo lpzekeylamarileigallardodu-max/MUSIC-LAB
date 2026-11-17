@@ -15,7 +15,7 @@ export type Seccion = "resumen" | "usuarios" | "clases" | "cursos" | "horarios" 
 
 type Props = {
   sesion: Sesion;
-  /** El servidor respondió 401: la sesión venció. */
+
   onSesionExpirada: () => void;
 };
 
@@ -24,7 +24,6 @@ type ItemMenu = { id: Seccion; titulo: string; icono: ReactNode; permitidos: Tip
 const TODOS: TipoUsuario[] = ["DIRECTOR", "SECRETARIA", "RECEPCIONISTA"];
 const DIRECCION_Y_SECRETARIA: TipoUsuario[] = ["DIRECTOR", "SECRETARIA"];
 
-// Qué ve cada cargo. El servidor lo vuelve a comprobar en cada petición (SecurityConfig).
 const MENU: ItemMenu[] = [
   { id: "resumen", titulo: "Resumen", icono: <IconInicio size={18} />, permitidos: TODOS },
   { id: "usuarios", titulo: "Usuarios", icono: <IconUsuario size={18} />, permitidos: DIRECCION_Y_SECRETARIA },

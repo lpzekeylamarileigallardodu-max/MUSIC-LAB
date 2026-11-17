@@ -2,10 +2,6 @@ package com.academia.academia.domain.model;
 
 import java.util.List;
 
-/**
- * Reporte tabular independiente del formato. El adaptador de Excel (Apache POI) lo convierte en un .xlsx;
- * así el dominio no conoce la librería.
- */
 public record Reporte(String nombreArchivo, String titulo, List<Hoja> hojas) {
 
     public enum Tipo { TEXTO, ENTERO, NUMERO, DINERO, PORCENTAJE, FECHA, FECHA_HORA }
@@ -20,11 +16,6 @@ public record Reporte(String nombreArchivo, String titulo, List<Hoja> hojas) {
         public static Columna fechaHora(String nombre) { return new Columna(nombre, Tipo.FECHA_HORA, 18); }
     }
 
-    /**
-     * Una hoja del libro. filaTotales: suma las columnas numéricas al final.
-     * cuadricula: hoja tipo calendario (celdas de texto con color; las celdas iguales consecutivas
-     * en una columna se combinan en un solo bloque).
-     */
     public record Hoja(String nombre, String subtitulo, List<Columna> columnas, List<List<Object>> filas,
                        boolean filaTotales, boolean cuadricula) {
 

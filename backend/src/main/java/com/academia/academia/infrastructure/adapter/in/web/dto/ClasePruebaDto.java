@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-/** Cuerpo de POST /api/clases-prueba. */
 public record ClasePruebaDto(
         @NotBlank(message = "Los nombres son obligatorios")
         @Size(max = 60, message = "Los nombres son demasiado largos") String nombres,

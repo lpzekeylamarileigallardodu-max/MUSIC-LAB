@@ -38,7 +38,6 @@ export default function UsuariosAdmin({ onExpira, tipoUsuario }: Props) {
     );
   }, [datos, busqueda, tipo]);
 
-  /** Ejecuta una acción sobre un usuario, avisa el resultado y vuelve a cargar la lista. */
   const ejecutar = async (u: UsuarioAdmin, accion: () => Promise<unknown>, textoOk: string) => {
     setOcupado(u.id);
     setAviso(null);

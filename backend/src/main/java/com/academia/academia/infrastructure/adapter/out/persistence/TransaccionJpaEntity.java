@@ -22,7 +22,6 @@ public class TransaccionJpaEntity {
     @JoinColumn(name = "id_pago", nullable = false)
     private PagoJpaEntity pago;
 
-    /** Quién la verificó o registró. null solo mientras está PENDIENTE. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario")
     private UsuarioJpaEntity procesadoPor;
@@ -30,11 +29,9 @@ public class TransaccionJpaEntity {
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
 
-    /** EFECTIVO, QR, TRANSFERENCIA o TARJETA. */
     @Column(name = "metodo_pago", nullable = false)
     private String metodoPago;
 
-    /** PENDIENTE, APROBADA, RECHAZADA o ANULADA. */
     @Column(name = "estado_transaccion", nullable = false)
     private String estado;
 

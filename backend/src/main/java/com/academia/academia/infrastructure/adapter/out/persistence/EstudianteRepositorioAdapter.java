@@ -25,10 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Consultas de lectura del panel del estudiante con JPA (entidades + JPQL, sin SQL nativo).
- * Todas filtran por el id del estudiante que viene de la sesión.
- */
 @Component
 public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto {
 
@@ -70,8 +66,6 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
         return estudiantes.buscarIdActivoPorCorreo(correo);
     }
 
-    // ---------------- Resumen ----------------
-
     @Override
     public Resumen resumen(Integer id) {
         LocalDate hoy = LocalDate.now();
@@ -88,7 +82,6 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
                 proximaClase(id));
     }
 
-    /** De los horarios de sus cursos activos, el que empieza antes a partir de este momento (la semana se repite). */
     private ProximaClase proximaClase(Integer id) {
         List<Integer> cursosActivos = inscripciones.deEstudiante(id).stream()
                 .filter(i -> "ACTIVA".equals(i.getEstado()) && Boolean.TRUE.equals(i.getCurso().getActivo()))
@@ -104,8 +97,6 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
                 .orElse(null);
     }
 
-    // ---------------- Cursos ----------------
-
     @Override
     public List<CursoEstudiante> cursos(Integer id) {
         List<InscripcionJpaEntity> propias = inscripciones.deEstudiante(id);
@@ -118,7 +109,7 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
                         Collectors.toList())));
 
         return propias.stream()
-                // primero las activas, luego de la más reciente a la más antigua
+
                 .sorted(Comparator.comparing((InscripcionJpaEntity i) -> !"ACTIVA".equals(i.getEstado()))
                         .thenComparing(InscripcionJpaEntity::getFechaInscripcion, Comparator.reverseOrder()))
                 .map(i -> {
@@ -130,8 +121,6 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
                 .toList();
     }
 
-    // ---------------- Cuotas ----------------
-
     @Override
     public List<CuotaEstudiante> cuotas(Integer id) {
         LocalDate hoy = LocalDate.now();
@@ -139,13 +128,11 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
         return cuotas.deEstudiante(id).stream()
                 .map(q -> new CuotaEstudiante(q.getId(), q.getInscripcion().getCurso().getNombreCurso(),
                         q.getMes(), q.getAnio(), q.getMonto(), q.getFechaVencimiento(),
-                        // Una cuota PENDIENTE cuya fecha ya pasó se muestra como VENCIDA
+
                         "PENDIENTE".equals(q.getEstado()) && q.getFechaVencimiento().isBefore(hoy) ? "VENCIDA" : q.getEstado(),
                         enRevision.contains(q.getId())))
                 .toList();
     }
-
-    // ---------------- Asistencia y notas ----------------
 
     @Override
     public List<AsistenciaEstudiante> asistencia(Integer id) {
@@ -165,8 +152,6 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
                 .toList();
     }
 
-    // ---------------- Material de apoyo ----------------
-
     @Override
     public List<MaterialEstudiante> material(Integer id) {
         return materiales.paraEstudiante(id).stream()
@@ -176,13 +161,11 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
                 .toList();
     }
 
-    // ---------------- Préstamos ----------------
-
     @Override
     public List<PrestamoEstudiante> prestamos(Integer id) {
         LocalDate hoy = LocalDate.now();
         return prestamos.deUsuario(id).stream()
-                // primero los vigentes, luego del más reciente al más antiguo
+
                 .sorted(Comparator.comparing((PrestamoInstrumentoJpaEntity p) ->
                                 !("ACTIVO".equals(p.getEstado()) || "ATRASADO".equals(p.getEstado())))
                         .thenComparing(PrestamoInstrumentoJpaEntity::getFechaPrestamo, Comparator.reverseOrder()))
@@ -192,8 +175,6 @@ public class EstudianteRepositorioAdapter implements EstudianteRepositorioPuerto
                         "ACTIVO".equals(p.getEstado()) && p.getFechaDevolucionPrevista().isBefore(hoy) ? "ATRASADO" : p.getEstado()))
                 .toList();
     }
-
-    // ---------------- Eventos ----------------
 
     @Override
     public List<EventoEstudiante> eventos(Integer id) {

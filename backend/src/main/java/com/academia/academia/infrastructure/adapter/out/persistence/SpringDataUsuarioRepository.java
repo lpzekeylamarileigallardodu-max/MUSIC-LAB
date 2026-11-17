@@ -23,11 +23,9 @@ public interface SpringDataUsuarioRepository extends JpaRepository<UsuarioJpaEnt
 
     boolean existsByCiAndIdNot(String ci, Integer id);
 
-    /** Usuarios activos agrupados por rol: [nombreRol, cantidad]. */
     @Query("select u.rol.nombreRol, count(u) from UsuarioJpaEntity u where u.activo = true group by u.rol.nombreRol")
     List<Object[]> contarActivosPorRol();
 
-    /** Cada usuario con su cargo (null si no es administrativo): [UsuarioJpaEntity, cargo]. */
     @Query("""
             select u, a.cargo from UsuarioJpaEntity u
             left join AdministrativoJpaEntity a on a.idUsuario = u.id

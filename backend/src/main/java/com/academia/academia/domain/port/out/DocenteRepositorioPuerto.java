@@ -15,7 +15,6 @@ import java.util.Set;
 
 public interface DocenteRepositorioPuerto {
 
-    /** id del docente activo (usuario con fila en la tabla docente) dueño de ese correo. */
     Optional<Integer> buscarIdPorCorreo(String correo);
 
     DocentePanel.Resumen resumen(Integer idDocente);
@@ -26,22 +25,18 @@ public interface DocenteRepositorioPuerto {
 
     List<AlumnoCurso> alumnos(Integer idCurso);
 
-    /** Ids de inscripción ACTIVA del curso. */
     Set<Integer> inscripcionesActivas(Integer idCurso);
 
     List<AsistenciaAlumno> asistencia(Integer idCurso, LocalDate fecha);
 
-    /** Inserta o corrige la asistencia de ese alumno ese día. */
     void guardarAsistencia(Integer idInscripcion, LocalDate fecha, String estado, String observacion);
 
     List<EvaluacionDocente> evaluaciones(Integer idCurso);
 
     boolean existeEvaluacion(Integer idCurso, String nombre);
 
-    /** Crea la evaluación (sin nota) para cada alumno activo del curso. Devuelve cuántas filas creó. */
     int crearEvaluacion(Integer idCurso, String nombre, LocalDate fecha);
 
-    /** La evaluación solo si pertenece a un curso de ese docente. */
     Optional<EvaluacionDocente> buscarEvaluacionDeDocente(Integer idDocente, Integer idEvaluacion);
 
     void actualizarEvaluacion(Integer idEvaluacion, BigDecimal nota, String comentario);

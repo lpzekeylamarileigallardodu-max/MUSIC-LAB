@@ -13,7 +13,6 @@ export default function Resumen({ onExpira, irA }: Props) {
 
   if (!datos) return <Estado cargando={cargando} error={error} onReintentar={recargar} />;
 
-  // Lo que requiere una acción del personal, primero. null = este cargo no ve ese dato.
   const todos: Pendiente[] = [
     { texto: "Comprobantes de pago por verificar", cantidad: datos.pagosPorVerificar, destino: "pagos", accion: "Ver pagos" },
     { texto: "Cuotas vencidas", cantidad: datos.cuotasVencidas, destino: "pagos", accion: "Ver cuotas" },

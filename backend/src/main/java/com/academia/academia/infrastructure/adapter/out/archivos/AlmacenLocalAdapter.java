@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 
-/** Guarda los comprobantes en una carpeta del servidor (por defecto backend/uploads/comprobantes). */
 @Component
 public class AlmacenLocalAdapter implements AlmacenArchivosPuerto {
 

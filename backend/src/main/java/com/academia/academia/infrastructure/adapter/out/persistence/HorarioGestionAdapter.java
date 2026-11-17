@@ -13,11 +13,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-/** Persistencia del tablero de horarios con JPA. */
 @Component
 public class HorarioGestionAdapter implements HorarioGestionPuerto {
 
-    /** Id imposible para "no excluir ninguno" en las consultas de choques. */
     private static final int NINGUNO = -1;
 
     private final SpringDataHorarioRepository horarios;
@@ -84,7 +82,7 @@ public class HorarioGestionAdapter implements HorarioGestionPuerto {
         horarios.choquesDeDocente(idDocente, dia, inicio, fin, excluir).stream()
                 .filter(h -> lista.stream().noneMatch(c -> c.idHorario().equals(h.getId())))
                 .forEach(h -> lista.add(aChoque(h, "DOCENTE")));
-        // La base tiene UNIQUE (id_curso, dia, hora_inicio) aunque el bloque esté inactivo
+
         horarios.findFirstByCursoIdAndDiaAndHoraInicioAndIdNot(idCurso, dia, inicio, excluir)
                 .filter(h -> lista.stream().noneMatch(c -> c.idHorario().equals(h.getId())))
                 .ifPresent(h -> lista.add(new Choque(h.getId(),
@@ -103,7 +101,7 @@ public class HorarioGestionAdapter implements HorarioGestionPuerto {
         h.setHoraInicio(inicio);
         h.setHoraFin(fin);
         h.setActivo(activo);
-        // flush: así el trigger de choques de la base se ejecuta aquí y no al final de la transacción
+
         return horarios.saveAndFlush(h).getId();
     }
 
@@ -117,8 +115,6 @@ public class HorarioGestionAdapter implements HorarioGestionPuerto {
     public void registrarBitacora(Integer idUsuario, String accion, String idRegistro, String descripcion, String ip) {
         Apoyo.bitacora(bitacora, idUsuario, accion, "horario", idRegistro, descripcion, ip);
     }
-
-    // ---------------- Conversión ----------------
 
     private Bloque aBloque(HorarioJpaEntity h) {
         CursoJpaEntity c = h.getCurso();

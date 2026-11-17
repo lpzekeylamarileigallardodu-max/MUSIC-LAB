@@ -26,7 +26,6 @@ public interface SpringDataPrestamoRepository extends JpaRepository<PrestamoInst
     @Query("select p from PrestamoInstrumentoJpaEntity p join fetch p.instrumento where p.prestatario.id = :idUsuario")
     List<PrestamoInstrumentoJpaEntity> deUsuario(@Param("idUsuario") Integer idUsuario);
 
-    /** Préstamos ACTIVO con la fecha de devolución pasada: la tarea programada los marca ATRASADO. */
     @Query("select p from PrestamoInstrumentoJpaEntity p where p.estado = 'ACTIVO' and p.fechaDevolucionPrevista < :hoy")
     List<PrestamoInstrumentoJpaEntity> activosVencidos(@Param("hoy") LocalDate hoy);
 }

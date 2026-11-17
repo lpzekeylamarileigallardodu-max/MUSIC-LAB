@@ -14,10 +14,6 @@ type Props = {
 
 const ESTADO_CLASE: Record<string, string> = { ACTIVA: "pill ok", RETIRADA: "pill bad", INACTIVA: "pill off", FINALIZADA: "pill off" };
 
-/**
- * Inscripciones de un usuario. Inscribir a un invitado lo pasa a estudiante y le genera la cuota del mes;
- * retirar anula sus cuotas que todavía no vencieron.
- */
 export default function InscripcionesUsuario({ usuario, onCerrar, onExpira }: Props) {
   const inscripciones = useCarga(() => adminInscripcionesDe(usuario.id), onExpira);
   const cursos = useCarga(adminCursos, onExpira);

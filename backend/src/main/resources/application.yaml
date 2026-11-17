@@ -2,12 +2,12 @@ spring:
   application:
     name: academia
   datasource:
-    url: jdbc:postgresql://localhost:5433/academia_jaime_gallardo   # base en Docker (docker-compose.yml)
-    username: postgres
-    password: Chinino10
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/academia_jaime_gallardo}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:Chinino10}
   servlet:
     multipart:
-      max-file-size: 20MB     # comprobantes (máx. 5 MB, se revisa aparte) y material de apoyo
+      max-file-size: 20MB
       max-request-size: 21MB
   jpa:
     hibernate:
@@ -16,8 +16,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:}   # correo de Gmail que envía los avisos (escríbelo aquí)
-    password: ${MAIL_PASSWORD:}   # contraseña de aplicación de Gmail (no la normal)
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -29,7 +29,8 @@ spring:
           writetimeout: 5000
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
   servlet:
     session:
       timeout: 8h
@@ -39,6 +40,6 @@ server:
 
 academia:
   archivos:
-    directorio: uploads       # aquí se guardan las fotos de los comprobantes (backend/uploads/comprobantes)
+    directorio: uploads
   correo:
     remitente: ${MAIL_USERNAME:}

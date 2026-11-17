@@ -55,7 +55,7 @@ public class AdminServiceImpl implements AdminCasosDeUso {
             throw new ReglaDeNegocioException("No puedes desactivar tu propia cuenta");
         }
         if (objetivo.activo() == activo) {
-            return objetivo;   // ya estaba así: no hay nada que cambiar
+            return objetivo;
         }
 
         admin.actualizarActivoUsuario(idUsuario, activo);
@@ -121,7 +121,6 @@ public class AdminServiceImpl implements AdminCasosDeUso {
                 "Usuario eliminado: " + objetivo.nombre() + " (" + objetivo.correo() + ")", ip);
     }
 
-    /** Texto obligatorio, sin espacios sobrantes y con largo entre min y max. */
     private static String texto(String valor, String campo, int min, int max) {
         String v = valor == null ? "" : valor.trim().replaceAll("\\s+", " ");
         if (v.length() < min || v.length() > max) {
@@ -130,7 +129,6 @@ public class AdminServiceImpl implements AdminCasosDeUso {
         return v;
     }
 
-    /** Texto opcional: vacío = null. */
     private static String opcional(String valor, String campo, int max) {
         if (valor == null || valor.isBlank()) return null;
         String v = valor.trim().replaceAll("\\s+", " ");

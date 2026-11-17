@@ -5,12 +5,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** Datos que ve un estudiante en su panel. Todos son de solo lectura. */
 public final class EstudiantePanel {
 
     private EstudiantePanel() {}
 
-    /** Próxima clase de la semana según los horarios de sus cursos activos. */
     public record ProximaClase(String curso, String dia, String horaInicio, String horaFin, String aula) {}
 
     public record Resumen(
@@ -19,10 +17,10 @@ public final class EstudiantePanel {
             int cuotasVencidas,
             BigDecimal montoPorPagar,
             int comprobantesEnRevision,
-            Integer asistenciaPorcentaje,   // null si todavía no tiene clases registradas
-            BigDecimal promedioNotas,       // null si todavía no tiene notas
+            Integer asistenciaPorcentaje,
+            BigDecimal promedioNotas,
             int prestamosActivos,
-            ProximaClase proximaClase) {}   // null si no tiene horarios
+            ProximaClase proximaClase) {}
 
     public record HorarioItem(String dia, String horaInicio, String horaFin, String aula) {}
 
@@ -44,9 +42,9 @@ public final class EstudiantePanel {
             int anio,
             BigDecimal monto,
             LocalDate fechaVencimiento,
-            /** PENDIENTE, VENCIDA, PAGADA o ANULADA (una PENDIENTE con fecha pasada se informa como VENCIDA). */
+
             String estado,
-            /** true si ya envió un comprobante y la secretaría todavía no lo revisó. */
+
             boolean comprobanteEnRevision) {}
 
     public record AsistenciaEstudiante(String curso, LocalDate fecha, String estado, String observacion) {}
@@ -70,7 +68,7 @@ public final class EstudiantePanel {
             LocalDateTime fechaPrestamo,
             LocalDate fechaDevolucionPrevista,
             LocalDateTime fechaDevolucionReal,
-            /** ACTIVO, ATRASADO, DEVUELTO o PERDIDO (un ACTIVO con fecha pasada se informa como ATRASADO). */
+
             String estado) {}
 
     public record EventoEstudiante(
@@ -82,6 +80,6 @@ public final class EstudiantePanel {
             LocalDateTime fin,
             String lugar,
             String estado,
-            /** null si el estudiante no participa en este evento. */
+
             String miParticipacion) {}
 }

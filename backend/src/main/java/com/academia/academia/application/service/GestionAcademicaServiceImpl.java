@@ -51,8 +51,6 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
         this.estudiantes = estudiantes;
     }
 
-    // ---------------- Inscripciones ----------------
-
     @Override
     public List<InscripcionAdmin> inscripcionesDe(Integer idUsuario) {
         usuarios.buscarPorId(idUsuario)
@@ -76,7 +74,6 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
             throw new ReglaDeNegocioException("El curso " + curso.nombre() + " está inactivo y no admite inscripciones");
         }
 
-        // 1) Un invitado pasa a estudiante en el mismo momento en que se inscribe
         boolean promovido = false;
         if (usuario.getTipoUsuario() == TipoUsuario.INVITADO) {
             usuarios.promoverAEstudiante(idUsuario);
@@ -86,7 +83,6 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
                     + usuario.getTipoUsuario() + ")");
         }
 
-        // 2) Si ya estuvo inscrito antes se reactiva la misma inscripción (la base no admite dos)
         Integer idInscripcion;
         boolean reactivada = false;
         var existente = gestion.buscarInscripcion(idUsuario, idCurso);
@@ -101,7 +97,6 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
             idInscripcion = gestion.crearInscripcion(idUsuario, idCurso);
         }
 
-        // 3) Cuota del mes en curso
         LocalDate hoy = LocalDate.now();
         int cuotas = 0;
         if (!gestion.existeCuota(idInscripcion, hoy.getMonthValue(), hoy.getYear())) {
@@ -125,7 +120,7 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
             throw new ReglaDeNegocioException("Solo se puede retirar una inscripción ACTIVA (está " + ins.estado() + ")");
         }
         gestion.cambiarEstadoInscripcion(idInscripcion, "RETIRADA");
-        // Las cuotas que todavía no vencieron ya no se cobran; las vencidas quedan como deuda
+
         int anuladas = gestion.anularCuotasPendientes(idInscripcion, LocalDate.now());
         gestion.registrarBitacora(actor.getId(), "ANULAR", "inscripcion", String.valueOf(idInscripcion),
                 "Retiro de " + ins.estudiante() + " de " + ins.curso() + " (" + anuladas + " cuotas anuladas)", ip);
@@ -161,8 +156,6 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
                 "Generó " + creadas + " cuotas de " + objetivo + " (" + existian + " ya existían)", ip);
         return new ResultadoGeneracion(mes, anio, creadas, existian);
     }
-
-    // ---------------- Pagos ----------------
 
     @Override
     @Transactional
@@ -212,7 +205,7 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
         gestion.resolverTransaccion(idTransaccion, "RECHAZADA", actor.getId(), null, codigo, obs);
         gestion.registrarBitacora(actor.getId(), "ANULAR", "transaccion", String.valueOf(idTransaccion),
                 "Comprobante rechazado de " + t.estudiante() + " (" + codigo + ")", ip);
-        // La cuota sigue pendiente o vencida: el estudiante puede enviar otro comprobante
+
         return new ResultadoPago(idTransaccion, "RECHAZADA", t.estudiante(), t.curso(), t.idCuota(), null);
     }
 
@@ -238,7 +231,7 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
         Integer idEstudiante = estudiantes.buscarIdPorCorreo(correoEstudiante)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No se encontró tu ficha de estudiante"));
         CuotaInfo q = gestion.buscarCuota(idCuota)
-                .filter(x -> x.idEstudiante().equals(idEstudiante))   // una cuota ajena es como si no existiera
+                .filter(x -> x.idEstudiante().equals(idEstudiante))
                 .orElseThrow(() -> new RecursoNoEncontradoException("No se encontró la cuota"));
         cuotaCobrable(q.id());
 
@@ -246,12 +239,12 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
         if (metodo == null || !METODOS_ESTUDIANTE.contains(metodo)) {
             throw new ReglaDeNegocioException("Método de pago no válido. Usa QR o TRANSFERENCIA");
         }
-        // La foto del comprobante se sube antes (POST /api/estudiante/comprobantes) y aquí llega su URL
+
         String url = limpiar(c.urlComprobante());
         if (url == null || !url.matches(java.util.regex.Pattern.quote(ComprobantesCasosDeUso.RUTA) + "[0-9a-f-]{36}\\.(png|jpg|webp)")) {
             throw new ReglaDeNegocioException("Sube la foto del comprobante");
         }
-        // El n.º de operación es opcional: si no lo escribe, se genera uno para identificar el pago
+
         String nro = limpiar(c.nroComprobante());
         if (nro == null) {
             nro = "FOTO-" + idCuota + "-" + System.currentTimeMillis();
@@ -268,16 +261,12 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
         return new ResultadoPago(idT, "PENDIENTE", q.estudiante(), q.curso(), idCuota, q.estado());
     }
 
-    // ---------------- Vencimientos ----------------
-
     @Override
     @Transactional
     public ResultadoVencimientos actualizarVencimientos() {
         LocalDate hoy = LocalDate.now();
         return new ResultadoVencimientos(gestion.marcarCuotasVencidas(hoy), gestion.marcarPrestamosAtrasados(hoy));
     }
-
-    // ---------------- Apoyo ----------------
 
     private TransaccionInfo transaccionPendiente(Integer id) {
         TransaccionInfo t = gestion.buscarTransaccion(id)
@@ -288,7 +277,6 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
         return t;
     }
 
-    /** Una cuota se puede pagar si está PENDIENTE o VENCIDA y no tiene otro comprobante esperando revisión. */
     private CuotaInfo cuotaCobrable(Integer idCuota) {
         CuotaInfo q = gestion.buscarCuota(idCuota)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe la cuota " + idCuota));
@@ -301,10 +289,6 @@ public class GestionAcademicaServiceImpl implements GestionAcademicaCasosDeUso {
         return q;
     }
 
-    /**
-     * Vence el día 20 del mes de la cuota. Si alguien se inscribe después del 20,
-     * su primera cuota vence 10 días después de inscribirse.
-     */
     private static LocalDate vencimientoPara(LocalDate hoy, YearMonth mes) {
         LocalDate dia20 = mes.atDay(Gestion.DIA_VENCIMIENTO);
         return dia20.isBefore(hoy) ? hoy.plusDays(10) : dia20;

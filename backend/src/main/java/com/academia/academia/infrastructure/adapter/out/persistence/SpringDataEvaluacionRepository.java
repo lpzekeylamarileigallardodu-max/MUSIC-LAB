@@ -19,7 +19,6 @@ public interface SpringDataEvaluacionRepository extends JpaRepository<Evaluacion
               and e.inscripcion.estado = 'ACTIVA' and e.nota is null""")
     long contarSinCalificarDeDocente(@Param("idDocente") Integer idDocente);
 
-    /** [idInscripcion, nota] de las notas ya puestas en esas inscripciones. */
     @Query("select e.inscripcion.id, e.nota from EvaluacionJpaEntity e where e.inscripcion.id in :inscripciones and e.nota is not null")
     List<Object[]> notasDeInscripciones(@Param("inscripciones") Collection<Integer> inscripciones);
 

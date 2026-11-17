@@ -13,7 +13,6 @@ export default function InicioEst({ onExpira, irA }: Props) {
 
   if (!datos) return <Estado cargando={cargando} error={error} onReintentar={recargar} />;
 
-  // Lo que necesita su atención, primero
   const avisos: Aviso[] = [];
   if (datos.cuotasVencidas > 0) {
     avisos.push({

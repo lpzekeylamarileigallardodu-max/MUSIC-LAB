@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
 
-/** Descarga de reportes en Excel (.xlsx generados con Apache POI). Permisos en SecurityConfig. */
 @RestController
 public class ReporteController {
 

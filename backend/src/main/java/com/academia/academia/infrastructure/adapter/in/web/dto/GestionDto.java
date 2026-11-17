@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 
-/** Cuerpos de las peticiones del tablero de horarios, inscripciones y pagos. */
 public final class GestionDto {
 
     private GestionDto() {}
@@ -21,7 +20,6 @@ public final class GestionDto {
             @NotNull(message = "Indica la hora de inicio") LocalTime horaInicio,
             @NotNull(message = "Indica la hora de fin") LocalTime horaFin) {}
 
-    /** Para revisar choques antes de guardar; id es el bloque que se está editando (o null). */
     public record VerificarDto(Integer id,
                                @NotNull Integer idCurso, @NotNull Integer idAula, @NotNull DiaSemana dia,
                                @NotNull LocalTime horaInicio, @NotNull LocalTime horaFin) {}

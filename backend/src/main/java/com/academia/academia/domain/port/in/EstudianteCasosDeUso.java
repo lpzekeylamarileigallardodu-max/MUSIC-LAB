@@ -4,10 +4,6 @@ import com.academia.academia.domain.model.EstudiantePanel;
 
 import java.util.List;
 
-/**
- * Casos de uso del panel del estudiante. Todos reciben el correo de quien tiene la sesión abierta:
- * un estudiante solo puede ver sus propios datos.
- */
 public interface EstudianteCasosDeUso {
 
     EstudiantePanel.Resumen resumen(String correo);

@@ -76,7 +76,6 @@ public class UsuarioRepositorioAdapter implements UsuarioRepositorioPuerto {
         UsuarioJpaEntity entidad = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new IllegalStateException("No existe el usuario " + idUsuario));
 
-        // Primero el rol: el trigger trg_estudiante_rol exige que el usuario ya sea ESTUDIANTE
         entidad.setRol(buscarRol(ROL_ESTUDIANTE));
         usuarioRepository.saveAndFlush(entidad);
         EstudianteJpaEntity estudiante = new EstudianteJpaEntity();
@@ -110,7 +109,6 @@ public class UsuarioRepositorioAdapter implements UsuarioRepositorioPuerto {
         return u;
     }
 
-    /** DOCENTE y ESTUDIANTE vienen del rol; los administrativos se distinguen por su cargo. */
     private TipoUsuario resolverTipo(UsuarioJpaEntity e) {
         String rol = e.getRol().getNombreRol();
         return switch (rol) {

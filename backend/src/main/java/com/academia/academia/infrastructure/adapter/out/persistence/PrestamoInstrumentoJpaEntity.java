@@ -39,7 +39,6 @@ public class PrestamoInstrumentoJpaEntity {
     @Column(name = "fecha_devolucion_real")
     private LocalDateTime fechaDevolucionReal;
 
-    /** ACTIVO, DEVUELTO, ATRASADO o PERDIDO. */
     @Column(name = "estado_prestamo", nullable = false)
     private String estado;
 

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Solicitud de clase de prueba. Requiere sesión iniciada. */
 @RestController
 @RequestMapping("/api/clases-prueba")
 public class ClasePruebaController {
@@ -28,7 +27,7 @@ public class ClasePruebaController {
     @PostMapping
     public ResponseEntity<ClasePruebaRespuestaDto> solicitar(@Valid @RequestBody ClasePruebaDto dto,
                                                              Authentication authentication) {
-        // authentication.getName() es el correo de quien tiene la sesión abierta
+
         ClasePruebaRegistrada registrada = clasePrueba.solicitar(new SolicitudClasePrueba(
                 dto.nombres(), dto.apPat(), dto.apMat(), dto.telefono(),
                 authentication.getName(), dto.cursoId(), dto.fecha()));

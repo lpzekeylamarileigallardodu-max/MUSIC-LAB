@@ -15,7 +15,6 @@ const TIPO: Record<MaterialEstudiante["tipo"], string> = {
   OTRO: "Otro",
 };
 
-/** Solo se abren enlaces http(s) o rutas del propio sitio; cualquier otra cosa (p. ej. javascript:) se descarta. */
 function enlaceSeguro(url: string): string | null {
   if (url.startsWith("/") && !url.startsWith("//")) return url;
   try {

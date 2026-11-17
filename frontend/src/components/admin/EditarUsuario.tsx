@@ -8,9 +8,8 @@ type Props = {
   onCerrar: (guardado: UsuarioAdmin | null) => void;
 };
 
-/** Ventana para editar nombre, CI, correo, teléfono y dirección de un usuario (solo director). */
 export default function EditarUsuario({ usuario, onExpira, onCerrar }: Props) {
-  // Usuarios antiguos pueden tener solo el nombre completo: se reparte en nombres y apellido
+
   const partes = usuario.nombre.split(" ");
   const [datos, setDatos] = useState<DatosUsuario>({
     nombres: usuario.nombres ?? partes.slice(0, Math.max(1, partes.length - 2)).join(" "),

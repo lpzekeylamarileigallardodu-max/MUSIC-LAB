@@ -1,6 +1,5 @@
 type Props = { cargando: boolean; error: string | null; onReintentar: () => void };
 
-/** Muestra "Cargando…" o el error con botón de reintento. Devuelve null cuando ya hay datos. */
 export default function Estado({ cargando, error, onReintentar }: Props) {
   if (error) {
     return (

@@ -12,8 +12,6 @@ import java.util.Optional;
 @Service
 public class AutenticacionServiceImpl implements AutenticacionCasosDeUso {
 
-    // Mismo mensaje si el correo no existe o la contraseña es incorrecta:
-    // así no se revela qué correos están registrados.
     private static final String CREDENCIALES_INVALIDAS = "Correo o contraseña incorrectos";
     private static final String USUARIO_INACTIVO = "Usuario inactivo. Comunícate con la academia.";
 

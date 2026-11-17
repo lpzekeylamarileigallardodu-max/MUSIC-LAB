@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-/** Arma los reportes con datos del dominio; el formato (.xlsx) lo resuelve el GeneradorExcelPuerto. */
 @Service
 @Transactional(readOnly = true)
 public class ReportesServiceImpl implements ReportesCasosDeUso {
@@ -63,8 +62,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
         this.docentes = docentes;
         this.estudiantes = estudiantes;
     }
-
-    // ---------------- Administración ----------------
 
     @Override
     public Archivo usuarios() {
@@ -130,7 +127,7 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
 
         List<Hoja> hojas = new ArrayList<>();
         hojas.add(cuadricula("Semana", "Horario semanal de todas las aulas", activos, true));
-        // Una cuadrícula por aula: así se ve la ocupación de cada sala
+
         activos.stream().map(Bloque::aula).distinct().sorted()
                 .forEach(aula -> hojas.add(cuadricula(aula, "Ocupación de " + aula,
                         activos.stream().filter(b -> b.aula().equals(aula)).toList(), false)));
@@ -141,7 +138,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
         return archivo(new Reporte("horarios", "Horarios de la academia", hojas));
     }
 
-    /** Hoja tipo calendario: filas cada 30 minutos, una columna por día. */
     private Hoja cuadricula(String nombre, String subtitulo, List<Bloque> bloques, boolean conAula) {
         List<Columna> columnas = new ArrayList<>();
         columnas.add(Columna.texto("Hora", 9));
@@ -174,7 +170,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
                         q.monto(), q.vencimiento(), q.estado()))
                 .toList();
 
-        // Morosidad: lo que debe cada estudiante (cuotas vencidas)
         Map<String, BigDecimal> deuda = new LinkedHashMap<>();
         Map<String, Integer> cantidad = new HashMap<>();
         cuotas.stream().filter(q -> "VENCIDA".equals(q.estado())).forEach(q -> {
@@ -186,7 +181,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
                 .map(e -> fila(e.getKey(), cantidad.get(e.getKey()), e.getValue()))
                 .toList();
 
-        // Por estado
         Map<String, List<ReportesRepositorioPuerto.CuotaFila>> porEstado = cuotas.stream()
                 .collect(Collectors.groupingBy(ReportesRepositorioPuerto.CuotaFila::estado, LinkedHashMap::new, Collectors.toList()));
         List<List<Object>> estados = porEstado.entrySet().stream()
@@ -215,7 +209,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
                         p.metodo(), p.estado(), p.nroComprobante(), p.verificadoPor(), p.fechaConfirmacion(), p.codigoError()))
                 .toList();
 
-        // Ingresos aprobados por mes y método
         Map<String, Map<String, BigDecimal>> porMes = new LinkedHashMap<>();
         TreeSet<String> metodos = new TreeSet<>();
         pagos.stream().filter(p -> "APROBADA".equals(p.estado())).forEach(p -> {
@@ -250,8 +243,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
                 Hoja.tabla("Ingresos por mes", "Solo pagos aprobados", columnasMes, ingresos).conTotales())));
     }
 
-    // ---------------- Docente ----------------
-
     @Override
     public Archivo cursoDocente(String correoDocente, Integer idCurso) {
         Integer idDocente = docentes.buscarIdPorCorreo(correoDocente)
@@ -269,7 +260,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
                         a.asistenciaPorcentaje() == null ? null : a.asistenciaPorcentaje() / 100.0, a.promedio()))
                 .toList();
 
-        // Notas: una fila por alumno y una columna por evaluación
         List<String> nombresEval = evaluaciones.stream()
                 .sorted(java.util.Comparator.comparing(EvaluacionDocente::fecha,
                         java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())))
@@ -289,7 +279,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
             return f;
         }).toList();
 
-        // Asistencia: una fila por alumno y una columna por fecha
         List<LocalDate> fechas = asistencia.stream().map(AsistenciaFila::fecha).distinct().sorted().toList();
         Map<Integer, Map<LocalDate, String>> marcas = new HashMap<>();
         asistencia.forEach(a -> marcas.computeIfAbsent(a.idInscripcion(), k -> new HashMap<>()).put(a.fecha(), inicial(a.estado())));
@@ -312,8 +301,6 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
                 Hoja.tabla("Notas", "Notas sobre 100", colNotas, filasNotas),
                 Hoja.tabla("Asistencia", "P = presente, T = tardanza, A = ausente, L = licencia", colAsis, filasAsis))));
     }
-
-    // ---------------- Estudiante ----------------
 
     @Override
     public Archivo libretaEstudiante(String correoEstudiante) {
@@ -362,14 +349,11 @@ public class ReportesServiceImpl implements ReportesCasosDeUso {
                         Columna.texto("Estado", 11), Columna.texto("En revisión", 11)), cuotas))));
     }
 
-    // ---------------- Apoyo ----------------
-
     private Archivo archivo(Reporte reporte) {
         String nombre = reporte.nombreArchivo() + "-" + LocalDate.now().format(SELLO) + ".xlsx";
         return new Archivo(nombre, excel.generar(reporte));
     }
 
-    /** List.of no admite null: los reportes tienen celdas vacías. */
     private static List<Object> fila(Object... valores) {
         return Arrays.asList(valores);
     }

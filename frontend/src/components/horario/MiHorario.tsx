@@ -10,11 +10,10 @@ type Props = {
   onExpira: () => void;
   mostrarDocente: boolean;
   vacio: string;
-  /** Botones extra (p. ej. descargar Excel). */
+
   acciones?: ReactNode;
 };
 
-/** Horario semanal de solo lectura (docente o estudiante). */
 export default function MiHorario({ cargar, onExpira, mostrarDocente, vacio, acciones }: Props) {
   const { datos, error, cargando, recargar } = useCarga(cargar, onExpira);
   const [elegido, setElegido] = useState<Bloque | null>(null);

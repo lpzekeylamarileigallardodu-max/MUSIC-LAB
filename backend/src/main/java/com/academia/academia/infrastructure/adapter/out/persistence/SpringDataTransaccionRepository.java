@@ -19,7 +19,6 @@ public interface SpringDataTransaccionRepository extends JpaRepository<Transacci
 
     boolean existsByPagoIdAndEstado(Integer idPago, String estado);
 
-    /** Ingresos aprobados entre dos momentos (monto verificado o, si falta, el del pago). */
     @Query("""
             select coalesce(sum(coalesce(t.montoRecibido, p.montoTotal)), 0)
             from TransaccionJpaEntity t join t.pago p
@@ -28,7 +27,6 @@ public interface SpringDataTransaccionRepository extends JpaRepository<Transacci
               and coalesce(t.fechaConfirmacion, t.fechaHora) < :hasta""")
     BigDecimal ingresosEntre(@Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 
-    /** Comprobantes por verificar, con todo lo que muestra la pantalla de secretaría. */
     @Query("""
             select t from TransaccionJpaEntity t
             join fetch t.pago p join fetch p.estudiante join fetch p.inscripcion i join fetch i.curso
@@ -48,13 +46,11 @@ public interface SpringDataTransaccionRepository extends JpaRepository<Transacci
             where t.pago.estudiante.id = :idEstudiante and t.estado = 'PENDIENTE'""")
     long contarPendientesDeEstudiante(@Param("idEstudiante") Integer idEstudiante);
 
-    /** Ids de las cuotas del estudiante que tienen un comprobante esperando revisión. */
     @Query("""
             select p.cuota.id from TransaccionJpaEntity t join t.pago p
             where p.estudiante.id = :idEstudiante and t.estado = 'PENDIENTE' and p.cuota is not null""")
     List<Integer> cuotasEnRevision(@Param("idEstudiante") Integer idEstudiante);
 
-    /** Historial completo de transacciones (reporte de pagos). */
     @Query("""
             select t from TransaccionJpaEntity t
             join fetch t.pago p join fetch p.estudiante join fetch p.inscripcion i join fetch i.curso

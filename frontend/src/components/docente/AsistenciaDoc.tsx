@@ -18,14 +18,13 @@ type Fila = { estado: EstadoAsistencia; observacion: string };
 
 function ListaAsistencia({ idCurso, fecha, onExpira }: { idCurso: number; fecha: string; onExpira: () => void }) {
   const { datos, error, cargando, recargar } = useCarga(() => docAsistencia(idCurso, fecha), onExpira);
-  // Solo lo que el docente cambió en pantalla; lo demás sale de lo que ya está guardado
+
   const [cambios, setCambios] = useState<Record<number, Partial<Fila>>>({});
   const [guardando, setGuardando] = useState(false);
   const [aviso, setAviso] = useState<Aviso | null>(null);
 
   if (!datos) return <Estado cargando={cargando} error={error} onReintentar={recargar} />;
 
-  // Un alumno sin registro ese día aparece como Presente: se corrigen solo las excepciones
   const valor = (a: AsistenciaAlumno): Fila => ({
     estado: cambios[a.idInscripcion]?.estado ?? a.estado ?? "PRESENTE",
     observacion: cambios[a.idInscripcion]?.observacion ?? a.observacion ?? "",

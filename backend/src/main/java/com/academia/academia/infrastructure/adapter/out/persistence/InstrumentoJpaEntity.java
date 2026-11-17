@@ -32,7 +32,6 @@ public class InstrumentoJpaEntity {
     @Column(name = "fecha_adquisicion")
     private LocalDate fechaAdquisicion;
 
-    /** DISPONIBLE, PRESTADO, EN_MANTENIMIENTO o DADO_DE_BAJA. */
     @Column(name = "estado_instrumento", nullable = false)
     private String estado;
 

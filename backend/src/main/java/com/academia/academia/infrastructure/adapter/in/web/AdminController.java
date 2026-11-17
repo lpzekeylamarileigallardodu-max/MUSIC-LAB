@@ -25,11 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * Panel del personal administrativo. Quién entra a qué se define en SecurityConfig:
- * resumen, clases de prueba y cursos: DIRECTOR, SECRETARIA y RECEPCIONISTA;
- * usuarios y pagos: DIRECTOR y SECRETARIA; activar/desactivar usuarios: solo DIRECTOR.
- */
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {

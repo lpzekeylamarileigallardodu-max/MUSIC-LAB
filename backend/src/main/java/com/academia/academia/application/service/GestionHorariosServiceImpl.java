@@ -41,8 +41,6 @@ public class GestionHorariosServiceImpl implements GestionHorariosCasosDeUso {
         this.estudiantes = estudiantes;
     }
 
-    // ---------------- Lectura ----------------
-
     @Override
     public Tablero tablero() {
         return new Tablero(horarios.listarTodos(), horarios.aulas(), horarios.cursos());
@@ -74,8 +72,6 @@ public class GestionHorariosServiceImpl implements GestionHorariosCasosDeUso {
         return cursos.isEmpty() ? List.of() : horarios.listarActivosDeCursos(cursos).stream()
                 .filter(Bloque::cursoActivo).toList();
     }
-
-    // ---------------- Escritura ----------------
 
     @Override
     @Transactional
@@ -137,7 +133,7 @@ public class GestionHorariosServiceImpl implements GestionHorariosCasosDeUso {
             return actual;
         }
         if (activo) {
-            // Al reactivar, el hueco pudo haberse ocupado mientras estaba inactivo
+
             DatosBloque datos = new DatosBloque(actual.idCurso(), actual.idAula(), DiaSemana.valueOf(actual.dia()),
                     LocalTime.parse(actual.horaInicio()), LocalTime.parse(actual.horaFin()));
             validarParaGuardar(id, datos, true);
@@ -158,9 +154,6 @@ public class GestionHorariosServiceImpl implements GestionHorariosCasosDeUso {
         horarios.registrarBitacora(actor.getId(), "ELIMINAR", String.valueOf(id), "Horario eliminado: " + describir(actual), ip);
     }
 
-    // ---------------- Reglas ----------------
-
-    /** Reglas que no necesitan la base de datos: día, rango del día, duración y pasos de 15 minutos. */
     private void validarForma(DatosBloque d) {
         if (d == null || d.idCurso() == null || d.idAula() == null || d.dia() == null || d.inicio() == null || d.fin() == null) {
             throw new ReglaDeNegocioException("Completa curso, aula, día, hora de inicio y hora de fin");
@@ -197,7 +190,7 @@ public class GestionHorariosServiceImpl implements GestionHorariosCasosDeUso {
             throw new ReglaDeNegocioException("El aula " + aula.nombre() + " está inactiva");
         }
         if (!quedaraActivo) {
-            return;   // un bloque inactivo no ocupa el aula ni al docente
+            return;
         }
         List<Choque> choques = horarios.choques(idExcluir, curso.id(), aula.id(), curso.idDocente(), d.dia().name(),
                 d.inicio(), d.fin());
@@ -217,7 +210,6 @@ public class GestionHorariosServiceImpl implements GestionHorariosCasosDeUso {
         };
     }
 
-    /** Fin de un bloque movido: si se pasa de la hora de cierre, se informa en lugar de cortar la clase. */
     private static LocalTime finSeguro(LocalTime inicio, Duration duracion) {
         LocalTime fin = inicio.plus(duracion);
         if (fin.isBefore(inicio) || fin.isAfter(HorarioGestion.CIERRE)) {

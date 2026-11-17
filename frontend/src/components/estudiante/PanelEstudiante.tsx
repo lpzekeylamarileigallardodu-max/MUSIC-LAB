@@ -19,7 +19,7 @@ export type SeccionEst = "inicio" | "cursos" | "horario" | "pagos" | "academico"
 
 type Props = {
   sesion: Sesion;
-  /** El servidor respondió 401: la sesión venció. */
+
   onSesionExpirada: () => void;
 };
 

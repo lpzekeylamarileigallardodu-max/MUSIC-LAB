@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Table(name = "usuario")
 public class UsuarioJpaEntity {
 
-    // SERIAL en PostgreSQL = int4, por eso Integer (con Long la validación del esquema falla)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
@@ -56,7 +55,6 @@ public class UsuarioJpaEntity {
     @Column(name = "activo", nullable = false)
     private Boolean activo;
 
-    // La rellena la base de datos (DEFAULT CURRENT_TIMESTAMP)
     @Column(name = "fecha_registro", insertable = false, updatable = false)
     private LocalDateTime fechaRegistro;
 

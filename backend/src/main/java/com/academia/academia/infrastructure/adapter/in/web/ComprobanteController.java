@@ -14,11 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * Foto del comprobante de pago.
- * El estudiante la sube (POST) y recibe la URL que luego manda junto con el pago;
- * secretaría y dirección la abren (GET) para decidir si aprueban o rechazan. Permisos en SecurityConfig.
- */
 @RestController
 public class ComprobanteController {
 

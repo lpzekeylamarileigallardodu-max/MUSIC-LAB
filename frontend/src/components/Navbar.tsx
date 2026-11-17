@@ -4,8 +4,7 @@ import { IconCampana, IconEngranaje, IconLuna, IconSol, IconUsuario, IconNota } 
 type Props = {
   theme: "light" | "dark";
   sesion: Sesion | null;
-  /** En el panel de administración se ocultan los enlaces de la página de inicio. */
-  /** ya no cambia nada (antes ocultaba el menú de la portada); se deja para no romper a quien lo pasa */
+
   modoPanel?: boolean;
   onToggleTheme: () => void;
   onLogin: () => void;

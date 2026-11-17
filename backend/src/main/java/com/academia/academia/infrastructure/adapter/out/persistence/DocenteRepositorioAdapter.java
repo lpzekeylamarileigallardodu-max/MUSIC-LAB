@@ -24,11 +24,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Consultas y escrituras del panel del docente con JPA (entidades + JPQL, sin SQL nativo).
- * Las operaciones que reciben un id de curso, evaluación o material se llaman solo después de que el servicio
- * comprobó que son del docente de la sesión.
- */
 @Component
 public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
 
@@ -67,8 +62,6 @@ public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
         return docentes.buscarIdActivoPorCorreo(correo);
     }
 
-    // ---------------- Resumen ----------------
-
     @Override
     public DocentePanel.Resumen resumen(Integer id) {
         return new DocentePanel.Resumen(
@@ -80,7 +73,6 @@ public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
                 proximaClase(id));
     }
 
-    /** La clase más cercana de aquí en adelante, mirando los horarios activos de sus cursos activos. */
     private ProximaClase proximaClase(Integer idDocente) {
         LocalDateTime ahora = LocalDateTime.now();
         return horarios.listarActivosDeDocente(idDocente).stream()
@@ -90,8 +82,6 @@ public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
                         Apoyo.hora(h.getHoraInicio()), Apoyo.hora(h.getHoraFin()), h.getAula().getNombreAula()))
                 .orElse(null);
     }
-
-    // ---------------- Cursos y alumnos ----------------
 
     @Override
     public List<CursoDocente> cursos(Integer idDocente) {
@@ -148,8 +138,6 @@ public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
         return inscripciones.activasDeCurso(idCurso).stream().map(InscripcionJpaEntity::getId).collect(Collectors.toSet());
     }
 
-    // ---------------- Asistencia ----------------
-
     @Override
     public List<AsistenciaAlumno> asistencia(Integer idCurso, LocalDate fecha) {
         Map<Integer, AsistenciaJpaEntity> delDia = asistencias.deCursoEnFecha(idCurso, fecha).stream()
@@ -163,7 +151,6 @@ public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
                 .toList();
     }
 
-    /** Si ese alumno ya tiene asistencia ese día se corrige; si no, se crea (no se duplica). */
     @Override
     public void guardarAsistencia(Integer idInscripcion, LocalDate fecha, String estado, String observacion) {
         AsistenciaJpaEntity a = asistencias.findByInscripcionIdAndFecha(idInscripcion, fecha).orElseGet(() -> {
@@ -176,8 +163,6 @@ public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
         a.setObservacion(observacion);
         asistencias.save(a);
     }
-
-    // ---------------- Evaluaciones ----------------
 
     @Override
     public List<EvaluacionDocente> evaluaciones(Integer idCurso) {
@@ -229,8 +214,6 @@ public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
         });
     }
 
-    // ---------------- Material de apoyo ----------------
-
     @Override
     public List<MaterialDocente> material(Integer idDocente) {
         return materiales.deDocente(idDocente).stream().map(this::aMaterial).toList();
@@ -268,8 +251,6 @@ public class DocenteRepositorioAdapter implements DocenteRepositorioPuerto {
             materiales.saveAndFlush(m);
         });
     }
-
-    // ---------------- Bitácora ----------------
 
     @Override
     public void registrarBitacora(Integer idUsuario, String accion, String tabla, String idRegistro,

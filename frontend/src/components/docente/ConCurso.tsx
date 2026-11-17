@@ -5,13 +5,12 @@ import { useCarga } from "../admin/useCarga";
 
 type Props = {
   onExpira: () => void;
-  /** Controles extra junto al selector (p. ej. la fecha). Puede depender del curso elegido. */
+
   barra?: ReactNode | ((curso: CursoDocente) => ReactNode);
-  /** Se vuelve a montar cada vez que cambia el curso, así cada curso carga sus propios datos. */
+
   children: (curso: CursoDocente) => ReactNode;
 };
 
-/** Carga los cursos del docente, muestra el selector y pinta el contenido del curso elegido. */
 export default function ConCurso({ onExpira, barra, children }: Props) {
   const { datos, error, cargando, recargar } = useCarga(docCursos, onExpira);
   const [elegido, setElegido] = useState<number | null>(null);

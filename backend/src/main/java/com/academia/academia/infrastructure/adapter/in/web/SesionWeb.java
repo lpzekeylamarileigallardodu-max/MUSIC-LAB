@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/** Abre y cierra la sesión (cookie JSESSIONID) del usuario en el servidor. */
 @Component
 public class SesionWeb {
 
@@ -23,7 +22,7 @@ public class SesionWeb {
     }
 
     public void iniciar(SesionUsuario usuario, HttpServletRequest request, HttpServletResponse response) {
-        // Si ya había una sesión, se le cambia el identificador (evita la fijación de sesión)
+
         if (request.getSession(false) != null) {
             request.changeSessionId();
         }

@@ -15,7 +15,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-/** Persistencia de inscripciones, cuotas y pagos con JPA. */
 @Component
 public class GestionAcademicaAdapter implements GestionAcademicaPuerto {
 
@@ -44,8 +43,6 @@ public class GestionAcademicaAdapter implements GestionAcademicaPuerto {
         this.prestamos = prestamos;
         this.bitacora = bitacora;
     }
-
-    // ---------------- Cursos e inscripciones ----------------
 
     @Override
     public Optional<CursoInfo> buscarCurso(Integer idCurso) {
@@ -94,7 +91,7 @@ public class GestionAcademicaAdapter implements GestionAcademicaPuerto {
         InscripcionJpaEntity i = inscripciones.findById(idInscripcion).orElseThrow();
         i.setEstado(estado);
         if ("ACTIVA".equals(estado)) {
-            i.setFechaInscripcion(LocalDateTime.now());   // la reinscripción cuenta desde hoy
+            i.setFechaInscripcion(LocalDateTime.now());
         }
         inscripciones.saveAndFlush(i);
     }
@@ -103,8 +100,6 @@ public class GestionAcademicaAdapter implements GestionAcademicaPuerto {
         return new InscripcionInfo(i.getId(), i.getEstudiante().getId(), i.getEstudiante().getNombreCompleto(),
                 i.getCurso().getId(), i.getCurso().getNombreCurso(), i.getCurso().getCostoMensual(), i.getEstado());
     }
-
-    // ---------------- Cuotas ----------------
 
     @Override
     public boolean existeCuota(Integer idInscripcion, int mes, int anio) {
@@ -158,8 +153,6 @@ public class GestionAcademicaAdapter implements GestionAcademicaPuerto {
                 .orElse(false);
     }
 
-    // ---------------- Pagos y transacciones ----------------
-
     @Override
     public boolean existeComprobante(String nroComprobante) {
         return transacciones.existsByNroComprobanteIgnoreCase(nroComprobante);
@@ -169,7 +162,7 @@ public class GestionAcademicaAdapter implements GestionAcademicaPuerto {
     public Integer registrarTransaccion(Integer idCuota, String metodoPago, String estado, String nroComprobante,
                                         String urlComprobante, BigDecimal montoRecibido, Integer idProcesador) {
         CuotaJpaEntity q = cuotas.findById(idCuota).orElseThrow();
-        // La tabla pago admite un solo pago por cuota: se reutiliza si ya hubo un intento anterior
+
         PagoJpaEntity pago = pagos.findByCuotaId(idCuota).orElseGet(() -> {
             PagoJpaEntity p = new PagoJpaEntity();
             p.setEstudiante(q.getInscripcion().getEstudiante());
@@ -226,8 +219,6 @@ public class GestionAcademicaAdapter implements GestionAcademicaPuerto {
         }
         transacciones.saveAndFlush(t);
     }
-
-    // ---------------- Vencimientos ----------------
 
     @Override
     public int marcarCuotasVencidas(LocalDate hoy) {

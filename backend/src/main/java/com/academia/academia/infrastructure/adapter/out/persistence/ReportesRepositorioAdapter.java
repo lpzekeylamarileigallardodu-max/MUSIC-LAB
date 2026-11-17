@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.List;
 
-/** Listados completos para los reportes de Excel, con JPA. */
 @Component
 public class ReportesRepositorioAdapter implements ReportesRepositorioPuerto {
 

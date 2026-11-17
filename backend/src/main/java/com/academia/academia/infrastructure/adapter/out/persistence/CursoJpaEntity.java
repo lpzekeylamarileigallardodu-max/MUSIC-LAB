@@ -17,7 +17,6 @@ public class CursoJpaEntity {
     @Column(name = "id_curso")
     private Integer id;
 
-    /** Docente que dicta el curso (curso.id_usuario). */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_usuario", nullable = false)
     private UsuarioJpaEntity docente;

@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/** Cuerpo de POST /api/auth/register. Los límites coinciden con las columnas de la tabla usuario. */
 public record RegistroDto(
         @NotBlank(message = "Los nombres son obligatorios")
         @Size(max = 60, message = "Los nombres son demasiado largos") String nombres,

@@ -37,8 +37,6 @@ public class DocenteServiceImpl implements DocenteCasosDeUso {
         this.docentes = docentes;
     }
 
-    // ---------------- Lectura ----------------
-
     @Override
     public DocentePanel.Resumen resumen(String correo) {
         return docentes.resumen(idDe(correo));
@@ -71,8 +69,6 @@ public class DocenteServiceImpl implements DocenteCasosDeUso {
     public List<DocentePanel.MaterialDocente> material(String correo) {
         return docentes.material(idDe(correo));
     }
-
-    // ---------------- Asistencia ----------------
 
     @Override
     @Transactional
@@ -113,8 +109,6 @@ public class DocenteServiceImpl implements DocenteCasosDeUso {
                 "Asistencia del curso " + idCurso + " del " + fecha + " (" + registros.size() + " alumnos)", ip);
         return new Guardado(registros.size());
     }
-
-    // ---------------- Evaluaciones ----------------
 
     @Override
     @Transactional
@@ -171,8 +165,6 @@ public class DocenteServiceImpl implements DocenteCasosDeUso {
         return docentes.buscarEvaluacionDeDocente(idDocente, idEvaluacion).orElse(actual);
     }
 
-    // ---------------- Material de apoyo ----------------
-
     @Override
     @Transactional
     public MaterialDocente agregarMaterial(String correo, NuevoMaterial datos, String ip) {
@@ -218,15 +210,11 @@ public class DocenteServiceImpl implements DocenteCasosDeUso {
         return docentes.buscarMaterialDeDocente(idDocente, idMaterial).orElse(actual);
     }
 
-    // ---------------- Apoyo ----------------
-
-    /** El id sale siempre de la sesión, nunca de la petición. */
     private Integer idDe(String correo) {
         return docentes.buscarIdPorCorreo(correo)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No se encontró tu ficha de docente"));
     }
 
-    /** Un curso ajeno se responde igual que uno inexistente. */
     private void verificarCurso(Integer idDocente, Integer idCurso) {
         if (idCurso == null || !docentes.dictaCurso(idDocente, idCurso)) {
             throw new RecursoNoEncontradoException("No se encontró el curso");
@@ -239,7 +227,6 @@ public class DocenteServiceImpl implements DocenteCasosDeUso {
         return t.isEmpty() ? null : t;
     }
 
-    /** Solo http(s) o una ruta del propio sitio; así no se guardan enlaces tipo javascript:. */
     private boolean esEnlaceValido(String url) {
         if (url == null || url.length() > 500) return false;
         String minus = url.toLowerCase();

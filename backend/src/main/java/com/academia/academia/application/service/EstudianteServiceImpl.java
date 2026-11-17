@@ -19,7 +19,6 @@ public class EstudianteServiceImpl implements EstudianteCasosDeUso {
         this.estudiantes = estudiantes;
     }
 
-    /** El id sale siempre de la sesión, nunca de la petición: así nadie puede pedir datos ajenos. */
     private Integer idDe(String correo) {
         return estudiantes.buscarIdPorCorreo(correo)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No se encontró tu ficha de estudiante"));

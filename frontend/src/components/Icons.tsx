@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 
 type IconProps = { size?: number; className?: string };
 
-/** Íconos de línea (trazo). Heredan el color del texto (currentColor). */
 function Linea({ size = 20, className, children }: IconProps & { children: ReactNode }) {
   return (
     <svg
@@ -22,7 +21,6 @@ function Linea({ size = 20, className, children }: IconProps & { children: React
   );
 }
 
-/** Íconos sólidos (relleno). */
 function Solido({ size = 20, className, d }: IconProps & { d: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">

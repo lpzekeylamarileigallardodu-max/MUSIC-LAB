@@ -18,7 +18,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Convierte los errores en respuestas JSON con el formato { mensaje, errores }. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -59,10 +58,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorDto.de(ex.getMessage()));
     }
 
-    /**
-     * Respaldo: una regla que solo detectó la base (los triggers usan RAISE EXCEPTION). Se devuelve el
-     * mensaje del trigger, que ya está escrito para el usuario.
-     */
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ErrorDto> baseDeDatos(DataAccessException ex) {
         if (ex instanceof DataIntegrityViolationException integridad) {
@@ -76,7 +71,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorDto.de(mensaje));
     }
 
-    // Respaldo: lo detecta la base de datos (dato repetido, columna obligatoria vacía, etc.)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorDto> integridad(DataIntegrityViolationException ex) {
         log.warn("Error de integridad en la base de datos: {}", ex.getMostSpecificCause().getMessage());

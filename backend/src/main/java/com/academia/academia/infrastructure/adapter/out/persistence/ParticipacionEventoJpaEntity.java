@@ -29,7 +29,6 @@ public class ParticipacionEventoJpaEntity {
     @Column(name = "detalle")
     private String detalle;
 
-    /** INSCRITO, CONFIRMADO, CANCELADO o ASISTIO. */
     @Column(name = "estado_participacion", nullable = false)
     private String estado;
 }

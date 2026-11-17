@@ -65,7 +65,6 @@ public class AuthController {
         return ResponseEntity.ok(cuerpo);
     }
 
-    /** Crea la cuenta como INVITADO y deja la sesión iniciada (no tiene que volver a ingresar). */
     @PostMapping("/register")
     public ResponseEntity<RegistroRespuestaDto> registrar(@Valid @RequestBody RegistroDto dto,
                                                           HttpServletRequest request,
@@ -85,7 +84,6 @@ public class AuthController {
                 "Cuenta creada. Te enviamos un correo de bienvenida."));
     }
 
-    /** Devuelve quién tiene la sesión abierta, con su tipo actual (401 si nadie). */
     @GetMapping("/me")
     public ResponseEntity<LoginRespuestaDto> me(Authentication authentication, HttpServletRequest request) {
         Optional<LoginResultado> actual = autenticacion.sesionDe(authentication.getName());

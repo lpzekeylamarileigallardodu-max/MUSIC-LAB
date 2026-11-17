@@ -34,7 +34,6 @@ public class CuotaJpaEntity {
     @Column(name = "fecha_vencimiento", nullable = false)
     private LocalDate fechaVencimiento;
 
-    /** PENDIENTE, PAGADA, VENCIDA o ANULADA. */
     @Column(name = "estado_cuota", nullable = false)
     private String estado;
 }

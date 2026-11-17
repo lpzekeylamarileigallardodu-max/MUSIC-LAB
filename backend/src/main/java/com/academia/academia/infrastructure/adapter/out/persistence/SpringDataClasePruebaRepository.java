@@ -15,7 +15,6 @@ public interface SpringDataClasePruebaRepository extends JpaRepository<ClasePrue
 
     long countByEstadoClase(String estadoClase);
 
-    /** [clase, prospecto, nombreCurso] ordenadas de la más reciente a la más antigua. */
     @Query("""
             select cp, p, c.nombreCurso from ClasePruebaJpaEntity cp
             join ProspectoJpaEntity p on p.id = cp.idProspecto

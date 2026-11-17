@@ -19,11 +19,6 @@ public class CorreoBienvenidaAdapter implements NotificadorCorreoPuerto {
 
     private static final String ASUNTO = "Te damos la bienvenida a la Academia de Música Jaime Gallardo";
 
-    /**
-     * Diseño pensado para clientes de correo (Gmail, Outlook, Apple Mail):
-     * tablas + estilos en línea, sin imágenes externas (así nunca sale "imagen bloqueada").
-     * Colores tomados de la web: azul #1c3a73 y ámbar #f5a623. Incluye modo oscuro y adaptación a móvil.
-     */
     private static final String PLANTILLA_HTML = """
             <!DOCTYPE html>
             <html lang="es">
@@ -176,7 +171,6 @@ public class CorreoBienvenidaAdapter implements NotificadorCorreoPuerto {
             </html>
             """;
 
-    /** Versión en texto plano: la usan los clientes que no muestran HTML y mejora la entrega (menos spam). */
     private static final String PLANTILLA_TEXTO = """
             Hola, {{nombre}}:
 
@@ -207,7 +201,6 @@ public class CorreoBienvenidaAdapter implements NotificadorCorreoPuerto {
         this.urlWeb = urlWeb;
     }
 
-    /** @Async: el estudiante no espera a que Gmail responda para terminar su registro. */
     @Override
     @Async
     public void enviarBienvenida(String nombre, String correo) {
@@ -228,7 +221,7 @@ public class CorreoBienvenidaAdapter implements NotificadorCorreoPuerto {
                     .replace("{{urlWeb}}", urlWeb);
 
             MimeMessage mensaje = sender.createMimeMessage();
-            // multipart = true para enviar texto plano + HTML en el mismo correo
+
             MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
             helper.setFrom(remitente, "Academia de Música Jaime Gallardo");
             helper.setTo(correo);

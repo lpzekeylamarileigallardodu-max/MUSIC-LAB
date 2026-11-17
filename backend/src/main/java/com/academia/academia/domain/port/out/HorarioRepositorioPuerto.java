@@ -6,6 +6,5 @@ import java.util.List;
 
 public interface HorarioRepositorioPuerto {
 
-    /** Horarios activos de cursos activos. */
     List<Horario> listarActivos();
 }

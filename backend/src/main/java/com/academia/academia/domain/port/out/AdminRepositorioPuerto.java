@@ -20,14 +20,12 @@ public interface AdminRepositorioPuerto {
 
     void actualizarActivoUsuario(Integer id, boolean activo);
 
-    /** true si otro usuario (distinto de idExcluir) ya usa ese correo / CI. */
     boolean correoEnUso(String correo, Integer idExcluir);
 
     boolean ciEnUso(String ci, Integer idExcluir);
 
     void actualizarDatosUsuario(Integer id, UsuarioAdmin.Datos datos);
 
-    /** Borra el usuario. Lanza ReglaDeNegocioException si tiene historial que lo impide (inscripciones, pagos...). */
     void eliminarUsuario(Integer id);
 
     List<ClasePruebaAdmin> listarClasesPrueba();
@@ -42,7 +40,6 @@ public interface AdminRepositorioPuerto {
 
     List<CuotaVencidaAdmin> listarCuotasVencidas();
 
-    /** Anota una acción en la tabla bitacora. */
     void registrarBitacora(Integer idUsuario, String accion, String tabla, String idRegistro,
                            String descripcion, String ip);
 }

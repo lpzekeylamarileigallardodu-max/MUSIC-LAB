@@ -21,7 +21,6 @@ public interface SpringDataMaterialRepository extends JpaRepository<MaterialApoy
     @Query("select m from MaterialApoyoJpaEntity m join fetch m.curso where m.id = :id and m.docente.id = :idDocente")
     Optional<MaterialApoyoJpaEntity> buscarDeDocente(@Param("idDocente") Integer idDocente, @Param("id") Integer id);
 
-    /** Material activo de los cursos donde el estudiante tiene una inscripción ACTIVA. */
     @Query("""
             select m from MaterialApoyoJpaEntity m join fetch m.curso c join fetch m.docente
             where m.activo = true and exists (

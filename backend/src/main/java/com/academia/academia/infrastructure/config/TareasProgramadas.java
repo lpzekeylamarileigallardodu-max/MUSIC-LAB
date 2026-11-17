@@ -10,10 +10,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-/**
- * Cada madrugada (y al arrancar) marca las cuotas PENDIENTE ya vencidas como VENCIDA
- * y los préstamos ACTIVO fuera de plazo como ATRASADO.
- */
 @Configuration
 @EnableScheduling
 public class TareasProgramadas {

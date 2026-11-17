@@ -21,7 +21,6 @@ public class MaterialApoyoJpaEntity {
     @JoinColumn(name = "id_curso", nullable = false)
     private CursoJpaEntity curso;
 
-    /** Docente que lo subió. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_usuario", nullable = false)
     private UsuarioJpaEntity docente;
@@ -32,7 +31,6 @@ public class MaterialApoyoJpaEntity {
     @Column(name = "descripcion")
     private String descripcion;
 
-    /** PARTITURA, GUIA, AUDIO, VIDEO, ENLACE u OTRO. */
     @Column(name = "tipo_material", nullable = false)
     private String tipo;
 

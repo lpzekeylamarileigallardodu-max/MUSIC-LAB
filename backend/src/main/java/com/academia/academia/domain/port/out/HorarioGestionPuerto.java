@@ -28,11 +28,9 @@ public interface HorarioGestionPuerto {
 
     Optional<AulaItem> buscarAula(Integer idAula);
 
-    /** Bloques activos que se cruzan en aula o docente, o que son del mismo curso a la misma hora de inicio. */
     List<Choque> choques(Integer idExcluir, Integer idCurso, Integer idAula, Integer idDocente, String dia,
                          LocalTime inicio, LocalTime fin);
 
-    /** Crea (id null) o actualiza un bloque y devuelve su id. */
     Integer guardar(Integer id, Integer idCurso, Integer idAula, String dia, LocalTime inicio, LocalTime fin, boolean activo);
 
     void eliminar(Integer id);

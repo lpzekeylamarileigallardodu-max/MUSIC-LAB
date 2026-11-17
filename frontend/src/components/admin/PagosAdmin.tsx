@@ -13,7 +13,6 @@ type Aviso = { clase: "ok" | "error"; texto: string };
 
 const MS_DIA = 86_400_000;
 
-/** Fila de un comprobante con sus dos salidas: aprobar (con el monto que llegó) o rechazar (con motivo). */
 function FilaComprobante({ p, ocupado, onAprobar, onRechazar }: {
   p: PagoPendienteAdmin;
   ocupado: boolean;
@@ -26,7 +25,7 @@ function FilaComprobante({ p, ocupado, onAprobar, onRechazar }: {
   const [codigo, setCodigo] = useState("NO_ENCONTRADO_EN_BANCO");
   const [obs, setObs] = useState("");
   const [viendoFoto, setViendoFoto] = useState(false);
-  // Las fotos subidas desde la web se sirven desde /api/archivos/...; las antiguas pueden ser enlaces externos
+
   const fotoPropia = p.urlComprobante?.startsWith("/api/archivos/") ?? false;
 
   return (
@@ -118,9 +117,8 @@ export default function PagosAdmin({ onExpira }: Props) {
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const hoy = new Date();
-  const [mesGen, setMesGen] = useState("");   // vacío = el mes siguiente
+  const [mesGen, setMesGen] = useState("");
 
-  // Meses que se pueden generar: el pasado, el actual y los dos siguientes (igual que el backend)
   const meses = [-1, 0, 1, 2].map((d) => {
     const f = new Date(hoy.getFullYear(), hoy.getMonth() + d, 1);
     return { valor: `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, "0")}`, texto: `${nombreMes(f.getMonth() + 1)} ${f.getFullYear()}` };

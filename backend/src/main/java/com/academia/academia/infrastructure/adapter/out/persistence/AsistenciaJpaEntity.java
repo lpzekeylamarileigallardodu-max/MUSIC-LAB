@@ -27,7 +27,6 @@ public class AsistenciaJpaEntity {
     @Column(name = "observacion")
     private String observacion;
 
-    /** PRESENTE, AUSENTE, TARDANZA o LICENCIA. */
     @Column(name = "estado_asistencia", nullable = false)
     private String estado;
 }

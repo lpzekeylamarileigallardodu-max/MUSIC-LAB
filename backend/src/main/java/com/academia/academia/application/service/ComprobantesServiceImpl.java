@@ -26,7 +26,7 @@ public class ComprobantesServiceImpl implements ComprobantesCasosDeUso {
         if (contenido.length > MAX_BYTES) {
             throw new ReglaDeNegocioException("La foto pesa más de 5 MB. Toma una captura o redúcela.");
         }
-        // El tipo se decide por los primeros bytes del archivo (no por el nombre, que se puede cambiar)
+
         String extension = extensionDe(contenido);
         if (extension == null) {
             throw new ReglaDeNegocioException("El comprobante debe ser una imagen PNG, JPG o WEBP");
@@ -36,7 +36,7 @@ public class ComprobantesServiceImpl implements ComprobantesCasosDeUso {
 
     @Override
     public Optional<Imagen> leer(String nombre) {
-        // Solo nombres generados por nosotros: evita que pidan "../application.yaml"
+
         if (nombre == null || !nombre.matches("[0-9a-f-]{36}\\.(png|jpg|webp)")) {
             return Optional.empty();
         }

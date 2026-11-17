@@ -18,7 +18,7 @@ export type SeccionDoc = "inicio" | "cursos" | "horario" | "alumnos" | "asistenc
 
 type Props = {
   sesion: Sesion;
-  /** El servidor respondió 401: la sesión venció. */
+
   onSesionExpirada: () => void;
 };
 

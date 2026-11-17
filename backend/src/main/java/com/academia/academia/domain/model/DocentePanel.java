@@ -5,14 +5,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** Datos y operaciones del panel del docente. */
 public final class DocentePanel {
 
     private DocentePanel() {}
 
-    // ---------------- Lo que ve el docente ----------------
-
-    /** Próxima clase según los horarios de sus cursos activos. fecha es el día concreto en que ocurre. */
     public record ProximaClase(String curso, String dia, LocalDate fecha, String horaInicio, String horaFin, String aula) {}
 
     public record Resumen(
@@ -20,8 +16,8 @@ public final class DocentePanel {
             int alumnosActivos,
             int clasesHoy,
             int evaluacionesSinCalificar,
-            Integer asistenciaPorcentaje,   // null si todavía no registró asistencia
-            ProximaClase proximaClase) {}   // null si sus cursos no tienen horarios
+            Integer asistenciaPorcentaje,
+            ProximaClase proximaClase) {}
 
     public record HorarioItem(String dia, String horaInicio, String horaFin, String aula) {}
 
@@ -37,10 +33,9 @@ public final class DocentePanel {
             Integer idInscripcion,
             String nombre,
             String correo,
-            Integer asistenciaPorcentaje,   // null si no tiene clases registradas
-            BigDecimal promedio) {}         // null si no tiene notas
+            Integer asistenciaPorcentaje,
+            BigDecimal promedio) {}
 
-    /** Un alumno en la lista de asistencia de un día. estado es null si ese día todavía no se registró. */
     public record AsistenciaAlumno(Integer idInscripcion, String nombre, String estado, String observacion) {}
 
     public record EvaluacionDocente(
@@ -63,14 +58,9 @@ public final class DocentePanel {
             LocalDateTime fechaSubida,
             boolean activo) {}
 
-    /** Resultado de una operación que guarda varias filas. */
     public record Guardado(int cantidad) {}
 
-    // ---------------- Lo que envía el docente ----------------
-
-    /** estado: PRESENTE, AUSENTE, TARDANZA o LICENCIA. */
     public record EntradaAsistencia(Integer idInscripcion, String estado, String observacion) {}
 
-    /** tipo: PARTITURA, GUIA, AUDIO, VIDEO, ENLACE u OTRO. */
     public record NuevoMaterial(Integer idCurso, String titulo, String descripcion, String tipo, String url) {}
 }

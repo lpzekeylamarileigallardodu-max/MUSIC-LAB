@@ -20,10 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * Panel del estudiante. Solo entra el rol ESTUDIANTE (ver SecurityConfig) y cada consulta
- * se hace con el correo de la sesión, así que un estudiante nunca ve datos de otro.
- */
 @RestController
 @RequestMapping("/api/estudiante")
 public class EstudianteController {
@@ -39,13 +35,11 @@ public class EstudianteController {
         this.gestion = gestion;
     }
 
-    /** Horario semanal de sus cursos activos. */
     @GetMapping("/horario")
     public List<HorarioGestion.Bloque> horario(Authentication auth) {
         return horarios.horarioEstudiante(auth.getName());
     }
 
-    /** Informa que pagó una cuota por QR o transferencia: secretaría lo verifica. */
     @PostMapping("/cuotas/{idCuota}/comprobante")
     public Gestion.ResultadoPago enviarComprobante(@PathVariable Integer idCuota,
                                                    @Valid @RequestBody GestionDto.ComprobanteDto dto,

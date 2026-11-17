@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Fila de la tabla docente: su clave es la misma del usuario. */
 @Entity
 @Table(name = "docente")
 @Getter

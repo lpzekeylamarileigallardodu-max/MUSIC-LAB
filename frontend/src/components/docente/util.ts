@@ -1,6 +1,5 @@
 import type { EstadoAsistencia, TipoMaterial } from "../../api";
 
-/** Hoy como aaaa-mm-dd en la hora local (no en UTC). */
 export const hoy = (): string => new Date().toLocaleDateString("en-CA");
 
 export const diaDeFecha = (aaaammdd: string): Date => new Date(`${aaaammdd}T00:00:00`);
@@ -23,7 +22,6 @@ export const TIPO_MATERIAL: Record<TipoMaterial, string> = {
   OTRO: "Otro",
 };
 
-/** Solo se abren enlaces http(s) o rutas del propio sitio; cualquier otra cosa (p. ej. javascript:) se descarta. */
 export function enlaceSeguro(url: string): string | null {
   if (url.startsWith("/") && !url.startsWith("//")) return url;
   try {
@@ -34,5 +32,4 @@ export function enlaceSeguro(url: string): string | null {
   }
 }
 
-/** Clase de color según el porcentaje de asistencia. */
 export const claseAsistencia = (pct: number): string => (pct >= 85 ? "pill ok" : pct >= 70 ? "pill warn" : "pill bad");

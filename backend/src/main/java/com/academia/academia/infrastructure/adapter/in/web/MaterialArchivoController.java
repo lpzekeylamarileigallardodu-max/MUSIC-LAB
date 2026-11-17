@@ -19,11 +19,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Archivos del material de apoyo (PDF, partituras, audios, etc.).
- * El docente sube el archivo (POST) y recibe la ruta que se guarda en el material;
- * cualquier usuario con sesión lo abre o descarga (GET).
- */
 @RestController
 public class MaterialArchivoController {
 
@@ -57,7 +52,7 @@ public class MaterialArchivoController {
 
     @GetMapping("/api/archivos/materiales/{nombre}")
     public ResponseEntity<byte[]> ver(@PathVariable String nombre) {
-        // Solo nombres que generamos nosotros (uuid.extension): evita pedir otros archivos del servidor
+
         if (!nombre.matches("[0-9a-f-]{36}\\.[a-z0-9]{2,5}")) {
             return ResponseEntity.notFound().build();
         }

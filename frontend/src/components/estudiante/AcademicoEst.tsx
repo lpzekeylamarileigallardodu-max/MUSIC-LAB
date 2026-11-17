@@ -21,7 +21,6 @@ export default function AcademicoEst({ onExpira }: Props) {
   const notas = useCarga(estEvaluaciones, onExpira);
   const [curso, setCurso] = useState("TODOS");
 
-  // Cursos que aparecen en alguno de los dos listados, para el filtro
   const cursos = useMemo(() => {
     const nombres = new Set<string>();
     asistencia.datos?.forEach((a) => nombres.add(a.curso));
@@ -32,7 +31,6 @@ export default function AcademicoEst({ onExpira }: Props) {
   const asistencias = (asistencia.datos ?? []).filter((a) => curso === "TODOS" || a.curso === curso);
   const evaluaciones = (notas.datos ?? []).filter((n) => curso === "TODOS" || n.curso === curso);
 
-  // Presente y tardanza cuentan como asistidas; la licencia no pesa en el porcentaje
   const validas = asistencias.filter((a) => a.estado !== "LICENCIA");
   const asistidas = validas.filter((a) => a.estado === "PRESENTE" || a.estado === "TARDANZA").length;
   const porcentaje = validas.length === 0 ? null : Math.round((asistidas * 100) / validas.length);

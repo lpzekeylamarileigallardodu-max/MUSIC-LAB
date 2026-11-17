@@ -14,7 +14,6 @@ type Props = {
   onLoginSuccess: (sesion: Sesion) => void;
 };
 
-/** Lee un campo del formulario; devuelve undefined si está vacío. */
 function campo(form: FormData, nombre: string): string | undefined {
   const valor = String(form.get(nombre) ?? "").trim();
   return valor === "" ? undefined : valor;
@@ -50,7 +49,6 @@ export default function AuthModal({ open, tab, motivo, onTabChange, onClose, onL
         return;
       }
 
-      // El servidor crea la cuenta, envía el correo de bienvenida y deja la sesión iniciada
       const sesion = await registrarse({
         nombres: campo(form, "nombres") ?? "",
         apPat: campo(form, "apPat") ?? "",
@@ -91,7 +89,6 @@ export default function AuthModal({ open, tab, motivo, onTabChange, onClose, onL
           </button>
         </div>
 
-        {/* key={tab}: al cambiar de pestaña se crea un formulario nuevo y vacío */}
         <form className="modal-body" key={tab} onSubmit={enviar}>
           {motivo && <p className="notice info">{motivo}</p>}
 

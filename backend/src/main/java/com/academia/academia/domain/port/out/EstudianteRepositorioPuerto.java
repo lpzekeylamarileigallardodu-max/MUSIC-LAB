@@ -7,7 +7,6 @@ import java.util.Optional;
 
 public interface EstudianteRepositorioPuerto {
 
-    /** id del estudiante (usuario con fila en la tabla estudiante) dueño de ese correo. */
     Optional<Integer> buscarIdPorCorreo(String correo);
 
     EstudiantePanel.Resumen resumen(Integer idEstudiante);

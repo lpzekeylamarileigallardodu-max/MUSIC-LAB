@@ -6,23 +6,22 @@ import {
 } from "./tiempo";
 import "./horario.css";
 
-/** Píxeles por minuto: una clase de 90 minutos mide 90 px de alto. */
 const PX = 1;
-/** Movimiento mínimo (px) para que un clic se convierta en arrastre. */
+
 const UMBRAL = 4;
 
 export type ColorPor = "curso" | "aula" | "docente";
 
 type Props = {
   bloques: Bloque[];
-  /** Bloques contra los que se revisan choques al arrastrar (por defecto, los mismos que se dibujan). */
+
   bloquesParaChoques?: Bloque[];
   editable?: boolean;
   colorPor?: ColorPor;
   seleccionado?: number | null;
   mostrarAula?: boolean;
   mostrarDocente?: boolean;
-  /** Días a mostrar (por defecto toda la semana). */
+
   dias?: Dia[];
   onSeleccionar?: (b: Bloque) => void;
   onMover?: (b: Bloque, dia: Dia, inicio: string) => void;
@@ -36,7 +35,6 @@ type Arrastre =
   | { modo: "redimensionar"; bloque: Bloque; y0: number; dia: Dia; inicio: number; fin: number; movido: boolean }
   | { modo: "crear"; dia: Dia; ancla: number; inicio: number; fin: number; movido: boolean };
 
-/** Reparte los bloques que se cruzan en carriles para que no se tapen (como un calendario). */
 function carriles(lista: Bloque[]): Map<number, { carril: number; total: number }> {
   const orden = [...lista].sort((a, b) => aMinutos(a.horaInicio) - aMinutos(b.horaInicio) || aMinutos(b.horaFin) - aMinutos(a.horaFin));
   const res = new Map<number, { carril: number; total: number }>();
@@ -86,7 +84,6 @@ export default function TableroSemanal({
   const [ahora, setAhora] = useState(() => new Date());
   const paraChoques = bloquesParaChoques ?? bloques;
 
-  // La línea de "ahora" se mueve sola cada minuto
   useEffect(() => {
     const t = setInterval(() => setAhora(new Date()), 60_000);
     return () => clearInterval(t);
@@ -107,8 +104,6 @@ export default function TableroSemanal({
 
   const horas: number[] = [];
   for (let t = APERTURA; t < CIERRE; t += 60) horas.push(t);
-
-  // ---------------- Arrastre con el puntero (ratón, lápiz o dedo) ----------------
 
   const diaBajo = (x: number, actual: Dia): Dia => {
     for (const d of dias) {
@@ -148,7 +143,7 @@ export default function TableroSemanal({
 
   const mover = (e: PointerEvent<HTMLDivElement>) => {
     if (!arrastre) return;
-    e.stopPropagation();   // el bloque, su asa y la columna escuchan el mismo evento
+    e.stopPropagation();
     if (arrastre.modo === "mover") {
       const b = arrastre.bloque;
       const largo = aMinutos(b.horaFin) - aMinutos(b.horaInicio);
@@ -175,7 +170,7 @@ export default function TableroSemanal({
     setArrastre(null);
     if (!a) return;
     if (a.modo === "crear") {
-      // Un clic suelto en un hueco propone una clase de 1 h 30 min
+
       const fin = a.movido ? a.fin : Math.min(a.inicio + 90, CIERRE);
       onCrear?.(a.dia, aHora(a.inicio), aHora(fin));
       return;
@@ -190,8 +185,6 @@ export default function TableroSemanal({
       onRedimensionar?.(a.bloque, aHora(a.fin));
     }
   };
-
-  // ---------------- Teclado ----------------
 
   const teclado = (e: KeyboardEvent<HTMLDivElement>, b: Bloque) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -223,8 +216,6 @@ export default function TableroSemanal({
     }
   };
 
-  // ---------------- Vista previa del arrastre ----------------
-
   let fantasma: { dia: Dia; inicio: number; fin: number; choques: string[]; texto: string } | null = null;
   if (arrastre && arrastre.movido) {
     const b = arrastre.modo === "crear" ? null : arrastre.bloque;
@@ -246,7 +237,6 @@ export default function TableroSemanal({
   return (
     <div className={`tablero ${editable ? "editable" : ""} ${arrastre?.movido ? "arrastrando" : ""}`}>
       <div className="tablero-grid" style={{ gridTemplateColumns: `56px repeat(${dias.length}, minmax(118px, 1fr))` }}>
-        {/* Encabezado */}
         <div className="tablero-esquina" />
         {dias.map((d) => (
           <div key={d} className={`tablero-dia ${d === diaHoy ? "hoy" : ""}`} title={DIA_LARGO[d]}>
@@ -255,14 +245,12 @@ export default function TableroSemanal({
           </div>
         ))}
 
-        {/* Regla de horas */}
         <div className="tablero-horas" style={{ height: alto }}>
           {horas.map((t) => (
             <span key={t} style={{ top: (t - APERTURA) * PX }}>{aHora(t)}</span>
           ))}
         </div>
 
-        {/* Columnas */}
         {dias.map((d) => (
           <div
             key={d}

@@ -13,7 +13,6 @@ import java.util.Optional;
 
 public interface SpringDataEventoRepository extends JpaRepository<EventoJpaEntity, Integer> {
 
-    /** Eventos aprobados o realizados con el lugar y la participación del usuario: [evento, nombreAula, estadoParticipacion]. */
     @Query("""
             select e, a.nombreAula, pe.estado from EventoJpaEntity e
             left join e.aula a

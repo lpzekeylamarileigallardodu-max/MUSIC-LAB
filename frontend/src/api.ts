@@ -27,7 +27,7 @@ export interface Horario {
   curso: string;
   docente: string;
   aula: string;
-  dia: string; // LUNES, MARTES, MIERCOLES...
+  dia: string;
   horaInicio: string;
   horaFin: string;
 }
@@ -38,10 +38,9 @@ export interface DatosClasePrueba {
   apMat?: string;
   telefono: string;
   cursoId: number;
-  fecha: string; // aaaa-mm-dd
+  fecha: string;
 }
 
-/** El servidor respondió 401: hay que iniciar sesión (o registrarse). */
 export class NoAutenticadoError extends Error {
   constructor() {
     super("Debes iniciar sesión para continuar");
@@ -50,7 +49,6 @@ export class NoAutenticadoError extends Error {
 
 const SIN_CONEXION = "No se pudo conectar con el servidor. Revisa que el backend esté encendido.";
 
-/** Envía una petición JSON. Si la respuesta no es 2xx, lanza un Error con el "mensaje" del backend. */
 async function peticion<T>(metodo: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", url: string, cuerpo?: unknown): Promise<T> {
   let respuesta: Response;
   try {
@@ -63,7 +61,6 @@ async function peticion<T>(metodo: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", 
     throw new Error(SIN_CONEXION);
   }
 
-  // En el login un 401 significa "credenciales incorrectas" (trae su propio mensaje)
   if (respuesta.status === 401 && !url.startsWith("/api/auth/login")) {
     throw new NoAutenticadoError();
   }
@@ -76,7 +73,7 @@ async function peticion<T>(metodo: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", 
   try {
     datos = await respuesta.json();
   } catch {
-    datos = null; // respuestas sin cuerpo (204)
+    datos = null;
   }
 
   if (!respuesta.ok) {
@@ -85,20 +82,16 @@ async function peticion<T>(metodo: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", 
   return datos as T;
 }
 
-// ---------------- Sesión ----------------
-
 export async function iniciarSesion(correo: string, password: string): Promise<Sesion> {
   const r = await peticion<Sesion>("POST", "/api/auth/login", { correo, password });
   return { tipoUsuario: r.tipoUsuario, nombre: r.nombre };
 }
 
-/** Crea la cuenta y el servidor deja la sesión iniciada. */
 export async function registrarse(datos: DatosRegistro): Promise<Sesion> {
   const r = await peticion<Sesion>("POST", "/api/auth/register", datos);
   return { tipoUsuario: r.tipoUsuario, nombre: r.nombre };
 }
 
-/** Pregunta al servidor quién tiene la sesión abierta. Nunca falla: devuelve null si nadie. */
 export async function obtenerSesion(): Promise<Sesion | null> {
   try {
     const r = await peticion<Sesion>("GET", "/api/auth/me");
@@ -112,11 +105,9 @@ export async function cerrarSesionServidor(): Promise<void> {
   try {
     await peticion<void>("POST", "/api/auth/logout");
   } catch {
-    /* si el servidor no responde, igual se cierra la sesión en pantalla */
+
   }
 }
-
-// ---------------- Cursos, horarios y clase de prueba ----------------
 
 export function listarCursos(): Promise<Curso[]> {
   return peticion<Curso[]>("GET", "/api/cursos");
@@ -135,9 +126,6 @@ export async function agendarClasePrueba(datos: DatosClasePrueba): Promise<strin
   return r.mensaje;
 }
 
-// ---------------- Panel de administración ----------------
-
-/** Personal administrativo: los únicos que ven el panel. */
 export const TIPOS_ADMIN: TipoUsuario[] = ["DIRECTOR", "SECRETARIA", "RECEPCIONISTA"];
 
 export function esAdministrativo(sesion: Sesion | null): boolean {
@@ -153,7 +141,7 @@ export interface ResumenAdmin {
   clasesPruebaProgramadas: number;
   prospectosNuevos: number;
   prestamosAtrasados: number;
-  /** null para RECEPCIONISTA (no ve finanzas) */
+
   pagosPorVerificar: number | null;
   cuotasVencidas: number | null;
   ingresosMes: number | null;
@@ -167,14 +155,13 @@ export interface UsuarioAdmin {
   telefono: string | null;
   tipoUsuario: TipoUsuario;
   activo: boolean;
-  fechaRegistro: string; // ISO
+  fechaRegistro: string;
   nombres: string | null;
   apPat: string | null;
   apMat: string | null;
   direccion: string | null;
 }
 
-/** Lo que se puede cambiar en "Editar usuario". */
 export interface DatosUsuario {
   nombres: string;
   apPat: string;
@@ -193,7 +180,7 @@ export interface ClasePruebaAdmin {
   telefono: string | null;
   correo: string | null;
   curso: string;
-  fechaHora: string; // ISO
+  fechaHora: string;
   estado: EstadoClase;
   observaciones: string | null;
 }
@@ -224,9 +211,9 @@ export interface PagoPendienteAdmin {
   monto: number;
   metodoPago: string;
   nroComprobante: string | null;
-  fecha: string; // ISO
+  fecha: string;
   urlComprobante: string | null;
-  /** lo que debía pagar (null si el pago no está ligado a una cuota) */
+
   montoCuota: number | null;
 }
 
@@ -238,7 +225,7 @@ export interface CuotaVencidaAdmin {
   mes: number;
   anio: number;
   monto: number;
-  fechaVencimiento: string; // aaaa-mm-dd
+  fechaVencimiento: string;
 }
 
 export const adminResumen = () => peticion<ResumenAdmin>("GET", "/api/admin/resumen");
@@ -248,7 +235,7 @@ export const adminCambiarEstadoUsuario = (id: number, activo: boolean) =>
 export const adminEditarUsuario = (id: number, datos: DatosUsuario) =>
   peticion<UsuarioAdmin>("PUT", `/api/admin/usuarios/${id}`, datos);
 export const adminEliminarUsuario = (id: number) => peticion<void>("DELETE", `/api/admin/usuarios/${id}`);
-/** Usa el endpoint que ya existía (solo DIRECTOR y SECRETARIA). */
+
 export const adminPromoverAEstudiante = (id: number) =>
   peticion<{ id: number; nombre: string; correo: string; tipoUsuario: TipoUsuario }>(
     "POST",
@@ -260,8 +247,6 @@ export const adminCambiarEstadoClase = (id: number, estado: EstadoClase) =>
 export const adminCursos = () => peticion<CursoAdmin[]>("GET", "/api/admin/cursos");
 export const adminPagosPendientes = () => peticion<PagoPendienteAdmin[]>("GET", "/api/admin/pagos-pendientes");
 export const adminCuotasVencidas = () => peticion<CuotaVencidaAdmin[]>("GET", "/api/admin/cuotas-vencidas");
-
-// ---------------- Panel del estudiante ----------------
 
 export function esEstudiante(sesion: Sesion | null): boolean {
   return sesion !== null && sesion.tipoUsuario === "ESTUDIANTE";
@@ -281,12 +266,12 @@ export interface ResumenEstudiante {
   cuotasVencidas: number;
   montoPorPagar: number;
   comprobantesEnRevision: number;
-  /** null si todavía no tiene clases registradas */
+
   asistenciaPorcentaje: number | null;
-  /** null si todavía no tiene notas */
+
   promedioNotas: number | null;
   prestamosActivos: number;
-  /** null si sus cursos no tienen horarios */
+
   proximaClase: ProximaClase | null;
 }
 
@@ -304,7 +289,7 @@ export interface CursoEstudiante {
   nivel: string | null;
   docente: string;
   estadoInscripcion: "ACTIVA" | "INACTIVA" | "RETIRADA" | "FINALIZADA";
-  fechaInscripcion: string; // ISO
+  fechaInscripcion: string;
   costoMensual: number | null;
   horarios: HorarioItem[];
 }
@@ -317,7 +302,7 @@ export interface CuotaEstudiante {
   mes: number;
   anio: number;
   monto: number;
-  fechaVencimiento: string; // aaaa-mm-dd
+  fechaVencimiento: string;
   estado: EstadoCuota;
   comprobanteEnRevision: boolean;
 }
@@ -326,7 +311,7 @@ export type EstadoAsistencia = "PRESENTE" | "AUSENTE" | "TARDANZA" | "LICENCIA";
 
 export interface AsistenciaEstudiante {
   curso: string;
-  fecha: string; // aaaa-mm-dd
+  fecha: string;
   estado: EstadoAsistencia;
   observacion: string | null;
 }
@@ -335,7 +320,7 @@ export interface EvaluacionEstudiante {
   curso: string;
   nombre: string;
   nota: number | null;
-  fecha: string | null; // aaaa-mm-dd
+  fecha: string | null;
   comentario: string | null;
 }
 
@@ -347,16 +332,16 @@ export interface MaterialEstudiante {
   tipo: "PARTITURA" | "GUIA" | "AUDIO" | "VIDEO" | "ENLACE" | "OTRO";
   url: string;
   docente: string;
-  fechaSubida: string; // ISO
+  fechaSubida: string;
 }
 
 export interface PrestamoEstudiante {
   id: number;
   instrumento: string;
   codigo: string;
-  fechaPrestamo: string; // ISO
-  fechaDevolucionPrevista: string; // aaaa-mm-dd
-  fechaDevolucionReal: string | null; // ISO
+  fechaPrestamo: string;
+  fechaDevolucionPrevista: string;
+  fechaDevolucionReal: string | null;
   estado: "ACTIVO" | "ATRASADO" | "DEVUELTO" | "PERDIDO";
 }
 
@@ -365,11 +350,11 @@ export interface EventoEstudiante {
   nombre: string;
   descripcion: string | null;
   tipo: string;
-  inicio: string; // ISO
-  fin: string | null; // ISO
+  inicio: string;
+  fin: string | null;
   lugar: string | null;
   estado: "APROBADO" | "REALIZADO";
-  /** INSCRITO, CONFIRMADO, CANCELADO, ASISTIO; null si no participa */
+
   miParticipacion: string | null;
 }
 
@@ -382,8 +367,6 @@ export const estMaterial = () => peticion<MaterialEstudiante[]>("GET", "/api/est
 export const estPrestamos = () => peticion<PrestamoEstudiante[]>("GET", "/api/estudiante/prestamos");
 export const estEventos = () => peticion<EventoEstudiante[]>("GET", "/api/estudiante/eventos");
 
-// ---------------- Panel del docente ----------------
-
 export function esDocente(sesion: Sesion | null): boolean {
   return sesion !== null && sesion.tipoUsuario === "DOCENTE";
 }
@@ -391,7 +374,7 @@ export function esDocente(sesion: Sesion | null): boolean {
 export interface ProximaClaseDocente {
   curso: string;
   dia: string;
-  fecha: string; // aaaa-mm-dd: el día concreto en que ocurre
+  fecha: string;
   horaInicio: string;
   horaFin: string;
   aula: string;
@@ -402,9 +385,9 @@ export interface ResumenDocente {
   alumnosActivos: number;
   clasesHoy: number;
   evaluacionesSinCalificar: number;
-  /** null si todavía no registró asistencia */
+
   asistenciaPorcentaje: number | null;
-  /** null si sus cursos no tienen horarios */
+
   proximaClase: ProximaClaseDocente | null;
 }
 
@@ -428,7 +411,7 @@ export interface AlumnoCurso {
 export interface AsistenciaAlumno {
   idInscripcion: number;
   nombre: string;
-  /** null: ese día todavía no se registró */
+
   estado: EstadoAsistencia | null;
   observacion: string | null;
 }
@@ -439,7 +422,7 @@ export interface EvaluacionDocente {
   alumno: string;
   nombre: string;
   nota: number | null;
-  fecha: string | null; // aaaa-mm-dd
+  fecha: string | null;
   comentario: string | null;
 }
 
@@ -453,7 +436,7 @@ export interface MaterialDocente {
   descripcion: string | null;
   tipo: TipoMaterial;
   url: string;
-  fechaSubida: string; // ISO
+  fechaSubida: string;
   activo: boolean;
 }
 
@@ -495,12 +478,6 @@ export const docAgregarMaterial = (datos: NuevoMaterial) =>
 export const docEstadoMaterial = (id: number, activo: boolean) =>
   peticion<MaterialDocente>("PATCH", `/api/docente/material/${id}/estado`, { activo });
 
-// ---------------- Descargas (Excel) ----------------
-
-/**
- * Descarga un archivo del servidor (los reportes .xlsx) y lo guarda con el nombre que manda el backend.
- * Lanza NoAutenticadoError si la sesión venció.
- */
 export async function descargar(url: string, nombrePorDefecto: string): Promise<void> {
   let r: Response;
   try {
@@ -515,7 +492,7 @@ export async function descargar(url: string, nombrePorDefecto: string): Promise<
     try {
       mensaje = (await r.json()).mensaje ?? mensaje;
     } catch {
-      /* sin cuerpo */
+
     }
     throw new Error(mensaje);
   }
@@ -541,12 +518,9 @@ export const descargarReporteCurso = (idCurso: number) =>
   descargar(`/api/docente/cursos/${idCurso}/reporte.xlsx`, "curso.xlsx");
 export const descargarLibreta = () => descargar("/api/estudiante/reporte.xlsx", "mi-libreta.xlsx");
 
-// ---------------- Tablero de horarios ----------------
-
 export type Dia = "LUNES" | "MARTES" | "MIERCOLES" | "JUEVES" | "VIERNES" | "SABADO" | "DOMINGO";
 export const DIAS: Dia[] = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"];
 
-/** Un horario semanal de un curso en un aula: se dibuja como un bloque del tablero. */
 export interface Bloque {
   id: number;
   idCurso: number;
@@ -556,8 +530,8 @@ export interface Bloque {
   idAula: number;
   aula: string;
   dia: Dia;
-  horaInicio: string; // HH:mm
-  horaFin: string; // HH:mm
+  horaInicio: string;
+  horaFin: string;
   activo: boolean;
   cursoActivo: boolean;
 }
@@ -616,15 +590,13 @@ export const horEliminar = (id: number) => peticion<void>("DELETE", `/api/admin/
 export const docHorario = () => peticion<Bloque[]>("GET", "/api/docente/horario");
 export const estHorario = () => peticion<Bloque[]>("GET", "/api/estudiante/horario");
 
-// ---------------- Inscripciones, cuotas y pagos ----------------
-
 export interface InscripcionAdmin {
   id: number;
   idCurso: number;
   curso: string;
   docente: string;
   estado: "ACTIVA" | "INACTIVA" | "RETIRADA" | "FINALIZADA";
-  fecha: string; // ISO
+  fecha: string;
   cuotasPorPagar: number;
 }
 
@@ -669,7 +641,7 @@ export const adminAprobarPago = (idTransaccion: number, montoRecibido?: number) 
   peticion<ResultadoPago>("POST", `/api/admin/pagos/${idTransaccion}/aprobar`, { montoRecibido });
 export const adminRechazarPago = (idTransaccion: number, codigoError: string, observaciones: string | null) =>
   peticion<ResultadoPago>("POST", `/api/admin/pagos/${idTransaccion}/rechazar`, { codigoError, observaciones });
-/** Sube un archivo del material de apoyo (docente) y devuelve la ruta para guardarla en el material. */
+
 export async function docSubirArchivoMaterial(archivo: File): Promise<string> {
   const datos = new FormData();
   datos.append("archivo", archivo);
@@ -685,7 +657,6 @@ export async function docSubirArchivoMaterial(archivo: File): Promise<string> {
   return cuerpo.url;
 }
 
-/** Sube la foto del comprobante (multipart) y devuelve la URL con la que se ve. */
 export async function estSubirComprobante(imagen: File): Promise<string> {
   const datos = new FormData();
   datos.append("imagen", imagen);

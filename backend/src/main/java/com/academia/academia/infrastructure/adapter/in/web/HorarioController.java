@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Horarios de los cursos. Requiere sesión iniciada. */
 @RestController
 @RequestMapping("/api/horarios")
 public class HorarioController {

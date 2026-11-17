@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/** Procesos de secretaría: inscripciones, cuotas y verificación de pagos (DIRECTOR y SECRETARIA). */
 @RestController
 @RequestMapping("/api/admin")
 public class AdminGestionController {
@@ -67,7 +66,6 @@ public class AdminGestionController {
         return gestion.rechazarPago(idTransaccion, dto.codigoError(), dto.observaciones(), auth.getName(), req.getRemoteAddr());
     }
 
-    /** Ejecuta ya la revisión de vencimientos (normalmente corre sola cada madrugada). */
     @PostMapping("/vencimientos/actualizar")
     public ResultadoVencimientos vencimientos() {
         return gestion.actualizarVencimientos();

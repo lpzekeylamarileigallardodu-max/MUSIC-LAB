@@ -19,10 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Consultas del panel de administración con JPA (entidades + JPQL, sin SQL nativo).
- * Los listados con varios JOIN se resuelven con "join fetch" para traer todo en una sola consulta.
- */
 @Component
 public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
 
@@ -59,8 +55,6 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
         this.bitacora = bitacora;
     }
 
-    // ---------------- Resumen ----------------
-
     @Override
     public ResumenAdmin resumen(boolean incluirFinanzas) {
         Map<String, Integer> porRol = new HashMap<>();
@@ -93,8 +87,6 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
                 ingresosMes);
     }
 
-    // ---------------- Usuarios ----------------
-
     @Override
     public List<UsuarioAdmin> listarUsuarios() {
         return usuarios.listarConCargo().stream().map(this::aUsuario).toList();
@@ -105,7 +97,6 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
         return usuarios.buscarConCargo(id).stream().findFirst().map(this::aUsuario);
     }
 
-    /** Tipo de usuario: el rol, y para los administrativos su cargo (DIRECTOR / SECRETARIA / RECEPCIONISTA). */
     private UsuarioAdmin aUsuario(Object[] fila) {
         UsuarioJpaEntity u = (UsuarioJpaEntity) fila[0];
         String cargo = (String) fila[1];
@@ -118,7 +109,7 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
 
     @Override
     public void actualizarActivoUsuario(Integer id, boolean activo) {
-        usuarios.findById(id).ifPresent(u -> u.setActivo(activo));   // se guarda al cerrar la transacción
+        usuarios.findById(id).ifPresent(u -> u.setActivo(activo));
     }
 
     @Override
@@ -143,14 +134,9 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
             u.setCorreo(d.correo());
             u.setTelefono(d.telefono());
             u.setDireccion(d.direccion());
-        });   // se guarda al cerrar la transacción
+        });
     }
 
-    /**
-     * Borra el usuario (sus filas de estudiante/docente/administrativo se borran solas por ON DELETE CASCADE).
-     * Si tiene historial (inscripciones, pagos, cursos a cargo, préstamos, eventos), la base lo impide con
-     * ON DELETE RESTRICT: se traduce a un mensaje claro para que lo desactive en vez de borrarlo.
-     */
     @Override
     public void eliminarUsuario(Integer id) {
         try {
@@ -161,8 +147,6 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
                     "No se puede eliminar: el usuario tiene historial (inscripciones, pagos, cursos o préstamos). Desactívalo en su lugar.");
         }
     }
-
-    // ---------------- Clases de prueba ----------------
 
     @Override
     public List<ClasePruebaAdmin> listarClasesPrueba() {
@@ -185,8 +169,6 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
     public void actualizarEstadoClasePrueba(Integer id, String estado) {
         clasesPrueba.findById(id).ifPresent(cp -> cp.setEstadoClase(estado));
     }
-
-    // ---------------- Cursos ----------------
 
     @Override
     public List<CursoAdmin> listarCursos() {
@@ -211,8 +193,6 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
                 .toList();
     }
 
-    // ---------------- Pagos ----------------
-
     @Override
     public List<PagoPendienteAdmin> listarPagosPendientes() {
         return transacciones.listarPendientes().stream()
@@ -235,8 +215,6 @@ public class AdminRepositorioAdapter implements AdminRepositorioPuerto {
                         q.getFechaVencimiento()))
                 .toList();
     }
-
-    // ---------------- Bitácora ----------------
 
     @Override
     public void registrarBitacora(Integer idUsuario, String accion, String tabla, String idRegistro,

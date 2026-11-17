@@ -33,10 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Panel del docente. Solo entra el rol DOCENTE (ver SecurityConfig) y todo se hace con el correo de la
- * sesión, así que un docente nunca ve ni modifica los cursos de otro.
- */
 @RestController
 @RequestMapping("/api/docente")
 public class DocenteController {
@@ -49,7 +45,6 @@ public class DocenteController {
         this.horarios = horarios;
     }
 
-    /** Horario semanal de sus cursos (bloques del tablero, solo lectura). */
     @GetMapping("/horario")
     public List<HorarioGestion.Bloque> horario(Authentication auth) {
         return horarios.horarioDocente(auth.getName());
@@ -70,8 +65,6 @@ public class DocenteController {
         return docente.alumnos(auth.getName(), idCurso);
     }
 
-    // ---- Asistencia ----
-
     @GetMapping("/cursos/{idCurso}/asistencia")
     public List<AsistenciaAlumno> asistencia(@PathVariable Integer idCurso,
                                              @RequestParam(required = false)
@@ -89,8 +82,6 @@ public class DocenteController {
                 .toList();
         return docente.guardarAsistencia(auth.getName(), idCurso, dto.fecha(), registros, request.getRemoteAddr());
     }
-
-    // ---- Evaluaciones ----
 
     @GetMapping("/cursos/{idCurso}/evaluaciones")
     public List<EvaluacionDocente> evaluaciones(@PathVariable Integer idCurso, Authentication auth) {
@@ -110,8 +101,6 @@ public class DocenteController {
                                        Authentication auth, HttpServletRequest request) {
         return docente.calificar(auth.getName(), idEvaluacion, dto.nota(), dto.comentario(), request.getRemoteAddr());
     }
-
-    // ---- Material de apoyo ----
 
     @GetMapping("/material")
     public List<MaterialDocente> material(Authentication auth) {

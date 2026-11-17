@@ -32,7 +32,7 @@ export default function MaterialDoc({ onExpira }: Props) {
   const [descripcion, setDescripcion] = useState("");
   const [tipo, setTipo] = useState<TipoMaterial>("GUIA");
   const [archivo, setArchivo] = useState<File | null>(null);
-  const [claveArchivo, setClaveArchivo] = useState(0);   // para vaciar el input después de publicar
+  const [claveArchivo, setClaveArchivo] = useState(0);
 
   const listaCursos = cursos.datos ?? [];
   const cursoElegido = idCurso ?? listaCursos.find((c) => c.activo)?.idCurso ?? listaCursos[0]?.idCurso ?? null;

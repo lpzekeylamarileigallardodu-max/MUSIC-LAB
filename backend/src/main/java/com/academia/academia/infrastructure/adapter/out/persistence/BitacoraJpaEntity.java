@@ -17,7 +17,6 @@ public class BitacoraJpaEntity {
     @Column(name = "id_bitacora")
     private Long id;
 
-    /** Quién hizo la acción; se guarda solo el id para no tener que cargar el usuario. */
     @Column(name = "id_usuario")
     private Integer idUsuario;
 

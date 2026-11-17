@@ -31,7 +31,6 @@ public interface GestionAcademicaPuerto {
 
     Integer crearCuota(Integer idInscripcion, int mes, int anio, BigDecimal monto, LocalDate vencimiento);
 
-    /** Pasa a ANULADA las cuotas PENDIENTE de la inscripción que vencen desde la fecha dada. */
     int anularCuotasPendientes(Integer idInscripcion, LocalDate desde);
 
     Optional<CuotaInfo> buscarCuota(Integer idCuota);
@@ -42,10 +41,6 @@ public interface GestionAcademicaPuerto {
 
     boolean existeComprobante(String nroComprobante);
 
-    /**
-     * Registra una transacción para la cuota. Reutiliza el pago de la cuota si ya existe
-     * (por ejemplo, después de un comprobante rechazado) o crea uno nuevo.
-     */
     Integer registrarTransaccion(Integer idCuota, String metodoPago, String estado, String nroComprobante,
                                  String urlComprobante, BigDecimal montoRecibido, Integer idProcesador);
 

@@ -21,7 +21,6 @@ const tabs: { id: TabId; icono: ReactNode; label: string }[] = [
   { id: "eventos", icono: <IconMicrofono size={19} />, label: "Eventos" },
 ];
 
-// El valor es el que guarda la base de datos (MAYÚSCULAS, sin tilde)
 const DIAS = [
   { valor: "LUNES", etiqueta: "Lunes" },
   { valor: "MARTES", etiqueta: "Martes" },
@@ -47,7 +46,6 @@ function mensajeDe(error: unknown): string {
   return error instanceof Error ? error.message : "Ocurrió un error inesperado";
 }
 
-/** Fecha de hoy en formato aaaa-mm-dd (hora local), para el mínimo del selector de fecha. */
 function hoyISO(): string {
   const d = new Date();
   const mes = String(d.getMonth() + 1).padStart(2, "0");
@@ -74,19 +72,16 @@ export default function SearchCard({ sesion, authAbierto, onRequiereAuth }: Prop
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [cursosError, setCursosError] = useState(false);
 
-  // Horarios
   const [filtroCurso, setFiltroCurso] = useState("");
   const [filtroDia, setFiltroDia] = useState("");
   const [horarios, setHorarios] = useState<Horario[] | null>(null);
   const [cargando, setCargando] = useState(false);
   const [avisoHorarios, setAvisoHorarios] = useState<Aviso | null>(null);
 
-  // Clase de prueba
   const [prueba, setPrueba] = useState(PRUEBA_VACIA);
   const [enviando, setEnviando] = useState(false);
   const [avisoPrueba, setAvisoPrueba] = useState<Aviso | null>(null);
 
-  // Acción que el visitante quiso hacer antes de registrarse: se ejecuta apenas tenga sesión
   const pendiente = useRef<Accion | null>(null);
 
   useEffect(() => {
@@ -147,7 +142,6 @@ export default function SearchCard({ sesion, authAbierto, onRequiereAuth }: Prop
     }
   };
 
-  /** Si no hay sesión, el visitante va al registro; al terminar, la acción se ejecuta sola. */
   const intentar = (accion: Accion) => {
     if (!sesion) {
       pendiente.current = accion;
@@ -158,12 +152,10 @@ export default function SearchCard({ sesion, authAbierto, onRequiereAuth }: Prop
     else void agendar();
   };
 
-  // Si el visitante cierra la ventana sin registrarse, se olvida lo que quería hacer
   useEffect(() => {
     if (!authAbierto && !sesion) pendiente.current = null;
   }, [authAbierto, sesion]);
 
-  // Cuando aparece la sesión (registro o ingreso), se ejecuta la acción pendiente
   useEffect(() => {
     if (!sesion || !pendiente.current) return;
     const accion = pendiente.current;

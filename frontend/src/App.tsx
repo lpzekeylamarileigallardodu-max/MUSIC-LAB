@@ -19,19 +19,16 @@ export default function App() {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
-  // Al cargar la página, el servidor dice si todavía hay una sesión abierta
   useEffect(() => {
     obtenerSesion().then(setSesion);
   }, []);
 
-  /** Botón "Iniciar Sesión" de la barra superior. */
   const abrirLogin = () => {
     setMotivo(undefined);
     setAuthTab("login");
     setAuthOpen(true);
   };
 
-  /** Un visitante intentó usar algo que pide cuenta (horarios, clase de prueba): se le lleva al registro. */
   const pedirRegistro = (texto: string) => {
     setSesion(null);
     setMotivo(texto);
@@ -49,7 +46,6 @@ export default function App() {
     setSesion(null);
   };
 
-  // El personal administrativo ve su panel en lugar de la página de inicio
   if (sesion && esAdministrativo(sesion)) {
     return (
       <>
@@ -66,7 +62,6 @@ export default function App() {
     );
   }
 
-  // Los estudiantes ven su panel en lugar de la página de inicio
   if (sesion && esEstudiante(sesion)) {
     return (
       <>
@@ -83,7 +78,6 @@ export default function App() {
     );
   }
 
-  // Los docentes ven su panel en lugar de la página de inicio
   if (sesion && esDocente(sesion)) {
     return (
       <>

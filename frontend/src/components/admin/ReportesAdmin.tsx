@@ -11,7 +11,6 @@ const REPORTES: { tipo: ReporteAdmin; titulo: string; detalle: string; finanzas:
   { tipo: "pagos", titulo: "Pagos", detalle: "Historial de transacciones e ingresos aprobados por mes y método.", finanzas: true },
 ];
 
-/** Descarga de reportes en Excel (generados en el servidor con Apache POI). */
 export default function ReportesAdmin({ onExpira, tipoUsuario }: Props) {
   const veFinanzas = tipoUsuario === "DIRECTOR" || tipoUsuario === "SECRETARIA";
   return (

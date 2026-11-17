@@ -3,7 +3,7 @@ import { DIAS, horVerificar, NoAutenticadoError, type AulaItem, type Choque, typ
 import { APERTURA, CIERRE, DIA_LARGO, DURACION_MAX, DURACION_MIN, aMinutos, opcionesHora, textoDuracion } from "./tiempo";
 
 type Props = {
-  /** null = clase nueva */
+
   idBloque: number | null;
   inicial: DatosBloque;
   activo?: boolean;
@@ -20,7 +20,6 @@ const MOTIVO: Record<Choque["motivo"], string> = {
   MISMO_CURSO: "el mismo curso a la misma hora",
 };
 
-/** Ventana para crear o editar una clase. Revisa choques en el servidor mientras se escribe. */
 export default function EditorBloque({ idBloque, inicial, activo = true, aulas, cursos, onGuardar, onCerrar, onExpira }: Props) {
   const [datos, setDatos] = useState<DatosBloque>(inicial);
   const [choques, setChoques] = useState<Choque[] | null>(null);
@@ -38,7 +37,6 @@ export default function EditorBloque({ idBloque, inicial, activo = true, aulas, 
   const curso = cursos.find((c) => c.id === datos.idCurso);
   const aula = aulas.find((a) => a.id === datos.idAula);
 
-  // Revisión de choques con una pequeña espera para no llamar al servidor en cada tecla
   useEffect(() => {
     if (errorLocal || !datos.idCurso || !datos.idAula) {
       setChoques(null);
@@ -59,7 +57,7 @@ export default function EditorBloque({ idBloque, inicial, activo = true, aulas, 
       vigente = false;
       clearTimeout(t);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [datos, idBloque, errorLocal]);
 
   const horasInicio = useMemo(() => opcionesHora(APERTURA, CIERRE - DURACION_MIN), []);
@@ -67,7 +65,6 @@ export default function EditorBloque({ idBloque, inicial, activo = true, aulas, 
 
   const cambiar = <K extends keyof DatosBloque>(k: K, v: DatosBloque[K]) => setDatos((d) => ({ ...d, [k]: v }));
 
-  /** Al cambiar la hora de inicio se conserva la duración. */
   const cambiarInicio = (ini: string) => {
     const dur = Math.max(minutos, DURACION_MIN);
     const fin = Math.min(aMinutos(ini) + dur, CIERRE);

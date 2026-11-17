@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-/** Cuerpos de las peticiones del panel del docente. */
 public final class DocenteDto {
 
     private DocenteDto() {}

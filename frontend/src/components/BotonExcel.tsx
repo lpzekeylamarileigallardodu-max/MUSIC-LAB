@@ -8,7 +8,6 @@ type Props = {
   className?: string;
 };
 
-/** Botón que descarga un reporte .xlsx y avisa si algo falla. */
 export default function BotonExcel({ descargar, onExpira, texto = "Descargar Excel", className = "btn-ghost chico" }: Props) {
   const [generando, setGenerando] = useState(false);
   const [error, setError] = useState<string | null>(null);

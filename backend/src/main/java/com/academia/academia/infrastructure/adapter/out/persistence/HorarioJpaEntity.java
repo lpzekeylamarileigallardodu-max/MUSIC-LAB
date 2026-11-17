@@ -25,7 +25,6 @@ public class HorarioJpaEntity {
     @JoinColumn(name = "id_aula", nullable = false)
     private AulaJpaEntity aula;
 
-    /** LUNES, MARTES, MIERCOLES... (MAYÚSCULAS, sin tilde). */
     @Column(name = "dia", nullable = false)
     private String dia;
 

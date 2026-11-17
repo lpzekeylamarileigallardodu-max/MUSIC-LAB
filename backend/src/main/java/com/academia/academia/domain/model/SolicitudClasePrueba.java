@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** Pedido de clase de prueba hecho desde la web por un usuario con sesión iniciada. */
 public record SolicitudClasePrueba(
         String nombres,
         String apPat,

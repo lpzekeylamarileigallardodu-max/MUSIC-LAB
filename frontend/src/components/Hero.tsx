@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
 
-/**
- * Para usar tus fotos: copia las imágenes a  frontend/public/imagenes/
- * y escribe aquí su nombre en "imagen". Si el archivo no existe, se ve el degradado de "respaldo".
- */
 const slides = [
   {
     title: "Aprende música con pasión",
@@ -40,7 +36,7 @@ export default function Hero() {
   }, []);
 
   const slide = slides[index];
-  // capas: oscurecido suave + foto + degradado de respaldo (si la foto no existe, se ve el degradado)
+
   const fondo = `linear-gradient(rgba(8,20,50,0.30), rgba(8,20,50,0.30)), url("${slide.imagen}") center / cover no-repeat, ${slide.respaldo}`;
 
   return (

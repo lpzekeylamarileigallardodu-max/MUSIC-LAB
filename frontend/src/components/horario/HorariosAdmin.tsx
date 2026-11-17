@@ -20,12 +20,6 @@ const datosDe = (b: Bloque): DatosBloque => ({
 
 const siguienteDia = (d: Dia): Dia => DIAS[(DIAS.indexOf(d) + 1) % DIAS.length];
 
-/**
- * Tablero de horarios del personal administrativo. Flujos:
- * arrastrar (mover de día/hora), estirar el borde (duración), dibujar en un hueco (crear),
- * editar en ventana con revisión de choques, duplicar a otro día, activar/desactivar, eliminar,
- * mover con el teclado y deshacer la última acción.
- */
 export default function HorariosAdmin({ onExpira, tipoUsuario }: Props) {
   const { datos, setDatos, error, cargando, recargar } = useCarga(horTablero, onExpira);
   const editable = tipoUsuario === "DIRECTOR" || tipoUsuario === "SECRETARIA";
@@ -46,9 +40,8 @@ export default function HorariosAdmin({ onExpira, tipoUsuario }: Props) {
 
   useEffect(() => {
     if (elegido) setDiaCopia(siguienteDia(elegido.dia));
-  }, [elegido?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [elegido?.id]);
 
-  // El aviso se va solo después de unos segundos
   useEffect(() => {
     if (!aviso) return;
     const t = setTimeout(() => setAviso(null), aviso.deshacer ? 8000 : 5000);
@@ -70,7 +63,6 @@ export default function HorariosAdmin({ onExpira, tipoUsuario }: Props) {
     return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]));
   }, [datos]);
 
-  /** Horas por semana que se usa cada aula (solo clases activas). */
   const ocupacion = useMemo(() => {
     if (!datos) return [];
     const lista = datos.aulas.map((a) => ({
@@ -91,8 +83,6 @@ export default function HorariosAdmin({ onExpira, tipoUsuario }: Props) {
     return [...m.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
   }, [visibles, colorPor]);
 
-  // ---------------- Acciones con actualización inmediata en pantalla ----------------
-
   const fallo = useCallback((err: unknown) => {
     if (err instanceof NoAutenticadoError) return onExpira();
     setAviso({ texto: err instanceof Error ? err.message : "No se pudo completar la acción", error: true });
@@ -101,7 +91,6 @@ export default function HorariosAdmin({ onExpira, tipoUsuario }: Props) {
   const reemplazar = (b: Bloque) =>
     setDatos((t: Tablero | null) => (t ? { ...t, bloques: t.bloques.map((x) => (x.id === b.id ? b : x)) } : t));
 
-  /** Cambia el bloque en pantalla antes de que responda el servidor; si falla, lo devuelve a su lugar. */
   const cambioOptimista = async (antes: Bloque, despues: Partial<Bloque>, llamada: () => Promise<Bloque>, texto: string) => {
     reemplazar({ ...antes, ...despues });
     try {
@@ -196,7 +185,6 @@ export default function HorariosAdmin({ onExpira, tipoUsuario }: Props) {
     }
   }, [aviso, recargar, fallo]);
 
-  // Atajos: Ctrl+Z deshace, Esc quita la selección
   useEffect(() => {
     const tecla = (e: globalThis.KeyboardEvent) => {
       if (editor) return;

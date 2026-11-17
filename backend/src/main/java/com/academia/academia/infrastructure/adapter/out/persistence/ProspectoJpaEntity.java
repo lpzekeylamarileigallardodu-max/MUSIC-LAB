@@ -36,11 +36,9 @@ public class ProspectoJpaEntity {
     @Column(name = "observaciones")
     private String observaciones;
 
-    // La rellena la base de datos (DEFAULT CURRENT_TIMESTAMP)
     @Column(name = "fecha_registro", insertable = false, updatable = false)
     private LocalDateTime fechaRegistro;
 
-    // Administrativo que lo registró. Queda NULL cuando la solicitud viene de la web.
     @Column(name = "id_usuario_registro")
     private Integer idUsuarioRegistro;
 

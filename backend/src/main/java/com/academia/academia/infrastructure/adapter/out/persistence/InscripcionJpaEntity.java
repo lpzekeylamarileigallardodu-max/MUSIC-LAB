@@ -17,7 +17,6 @@ public class InscripcionJpaEntity {
     @Column(name = "id_inscripcion")
     private Integer id;
 
-    /** Estudiante inscrito (inscripcion.id_usuario). */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_usuario", nullable = false)
     private UsuarioJpaEntity estudiante;
@@ -26,7 +25,6 @@ public class InscripcionJpaEntity {
     @JoinColumn(name = "id_curso", nullable = false)
     private CursoJpaEntity curso;
 
-    /** ACTIVA, INACTIVA, RETIRADA o FINALIZADA. */
     @Column(name = "estado_inscripcion", nullable = false)
     private String estado;
 
