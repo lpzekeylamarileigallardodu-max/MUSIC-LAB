@@ -4,6 +4,7 @@ import {
   horMover, horTablero, type Bloque, type DatosBloque, type Dia, type Tablero, type TipoUsuario,
 } from "../../api";
 import Estado from "../admin/Estado";
+import { IconBasura, IconCopiar, IconDescargar, IconEditar, IconMas, IconPausa, IconPlay } from "../Icons";
 import { useCarga } from "../admin/useCarga";
 import EditorBloque from "./EditorBloque";
 import TableroSemanal, { type ColorPor } from "./TableroSemanal";
@@ -237,8 +238,8 @@ export default function HorariosAdmin({ onExpira, tipoUsuario }: Props) {
           Ver inactivas
         </label>
         <span className="separador" />
-        <button className="btn-ghost chico" onClick={excel} disabled={ocupado}>Descargar Excel</button>
-        {editable && <button className="btn-primary" onClick={() => nuevaClase()}>+ Nueva clase</button>}
+        <button className="btn-ghost chico" onClick={excel} disabled={ocupado}><IconDescargar size={16} />Descargar Excel</button>
+        {editable && <button className="btn-primary" onClick={() => nuevaClase()}><IconMas size={16} />Nueva clase</button>}
       </div>
 
       <ul className="ocupacion" aria-label="Uso de cada aula por semana">
@@ -300,19 +301,19 @@ export default function HorariosAdmin({ onExpira, tipoUsuario }: Props) {
               <div className="detalle-acciones">
                 <button className="btn-ghost chico" disabled={ocupado}
                   onClick={() => setEditor({ id: elegido.id, activo: elegido.activo, datos: datosDe(elegido) })}>
-                  Editar
+                  <IconEditar size={16} />Editar
                 </button>
                 <div className="duplicar-fila">
                   <select value={diaCopia} onChange={(e) => setDiaCopia(e.target.value as Dia)} aria-label="Día de la copia">
                     {DIAS.map((d) => <option key={d} value={d}>{DIA_LARGO[d]}</option>)}
                   </select>
-                  <button className="btn-ghost chico" disabled={ocupado} onClick={() => duplicar(elegido, diaCopia)}>Duplicar</button>
+                  <button className="btn-ghost chico" disabled={ocupado} onClick={() => duplicar(elegido, diaCopia)}><IconCopiar size={16} />Duplicar</button>
                 </div>
                 <button className="btn-ghost chico" disabled={ocupado} onClick={() => cambiarEstado(elegido)}>
-                  {elegido.activo ? "Desactivar" : "Activar"}
+                  {elegido.activo ? <><IconPausa size={16} />Desactivar</> : <><IconPlay size={16} />Activar</>}
                 </button>
                 <button className="btn-ghost chico btn-peligro" disabled={ocupado} onClick={() => eliminar(elegido)}>
-                  Eliminar
+                  <IconBasura size={16} />Eliminar
                 </button>
               </div>
             )}

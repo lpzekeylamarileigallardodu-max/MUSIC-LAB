@@ -7,6 +7,8 @@ import BotonExcel from "../BotonExcel";
 import Estado from "./Estado";
 import { useCarga } from "./useCarga";
 import { bs, fecha, fechaHora, nombreMes } from "./util";
+import BotonIcono from "../Leyenda";
+import { IconCerrar, IconCheck, IconDinero } from "../Icons";
 
 type Props = { onExpira: () => void; tipoUsuario: TipoUsuario };
 type Aviso = { clase: "ok" | "error"; texto: string };
@@ -73,8 +75,10 @@ function FilaComprobante({ p, ocupado, onAprobar, onRechazar }: {
       <td className="acciones">
         {modo === "ver" && (
           <>
-            <button className="btn-ghost chico" disabled={ocupado} onClick={() => setModo("aprobar")}>Aprobar</button>
-            <button className="btn-ghost chico btn-peligro" disabled={ocupado} onClick={() => setModo("rechazar")}>Rechazar</button>
+            <div className="grupo-iconos">
+              <BotonIcono texto="Aprobar pago" icono={<IconCheck size={18} />} tono="exito" disabled={ocupado} onClick={() => setModo("aprobar")} />
+              <BotonIcono texto="Rechazar pago" icono={<IconCerrar size={18} />} tono="peligro" disabled={ocupado} onClick={() => setModo("rechazar")} />
+            </div>
           </>
         )}
         {modo === "aprobar" && (
@@ -249,8 +253,10 @@ export default function PagosAdmin({ onExpira }: Props) {
                         <div className="sub alerta">{dias === 1 ? "hace 1 día" : `hace ${dias} días`}</div>
                       </td>
                       <td>
-                        <button
-                          className="btn-ghost chico"
+                        <BotonIcono
+                          texto="Cobrar en efectivo"
+                          icono={<IconDinero size={18} />}
+                          tono="exito"
                           disabled={ocupado}
                           onClick={() => {
                             if (!window.confirm(`¿Registrar el pago en efectivo de ${bs(c.monto)} de ${c.estudiante}?`)) return;
@@ -259,9 +265,7 @@ export default function PagosAdmin({ onExpira }: Props) {
                               return `Cobro en efectivo registrado: ${c.estudiante}, ${nombreMes(c.mes)} ${c.anio}.`;
                             });
                           }}
-                        >
-                          Cobrar en efectivo
-                        </button>
+                        />
                       </td>
                     </tr>
                   );

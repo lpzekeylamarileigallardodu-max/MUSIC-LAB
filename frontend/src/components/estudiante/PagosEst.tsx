@@ -1,8 +1,9 @@
-import { Fragment, useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { Fragment, useState, type FormEvent } from "react";
 import { NoAutenticadoError, estCuotas, estEnviarComprobante, estSubirComprobante, type CuotaEstudiante, type EstadoCuota } from "../../api";
 import Estado from "../admin/Estado";
 import { useCarga } from "../admin/useCarga";
 import { bs, fecha, nombreMes } from "../admin/util";
+import ZonaArchivo from "../ZonaArchivo";
 
 type Props = { onExpira: () => void };
 
@@ -22,30 +23,8 @@ function FormComprobante({ cuota, onEnviado, onCancelar, onExpira }: {
   const [metodo, setMetodo] = useState<"QR" | "TRANSFERENCIA">("QR");
   const [nro, setNro] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
-  const [vista, setVista] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!foto) return setVista(null);
-    const url = URL.createObjectURL(foto);
-    setVista(url);
-    return () => URL.revokeObjectURL(url);
-  }, [foto]);
-
-  const elegir = (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
-    setError(null);
-    if (f && !["image/png", "image/jpeg", "image/webp"].includes(f.type)) {
-      setError("La foto debe ser PNG, JPG o WEBP");
-      return setFoto(null);
-    }
-    if (f && f.size > 5 * 1024 * 1024) {
-      setError("La foto pesa más de 5 MB. Toma una captura o redúcela.");
-      return setFoto(null);
-    }
-    setFoto(f);
-  };
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
@@ -79,11 +58,19 @@ function FormComprobante({ cuota, onEnviado, onCancelar, onExpira }: {
             <option value="TRANSFERENCIA">Transferencia bancaria</option>
           </select>
         </label>
-        <label>
-          FOTO DEL COMPROBANTE
-          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={elegir} required />
-        </label>
-        {vista && <img className="pago-qr-vista" src={vista} alt="Vista previa del comprobante" />}
+        <div className="campo-archivo">
+          <span className="etiqueta">FOTO DEL COMPROBANTE</span>
+          <ZonaArchivo
+            archivo={foto}
+            onCambio={(f) => { setFoto(f); setError(null); }}
+            extensiones={["png", "jpg", "jpeg", "webp"]}
+            maxMB={5}
+            vistaPrevia
+            disabled={enviando}
+            titulo="Arrastra la foto o captura de tu pago"
+            detalle="PNG, JPG o WEBP · hasta 5 MB"
+          />
+        </div>
         <label>
           N.º DE OPERACIÓN (OPCIONAL)
           <input value={nro} onChange={(e) => setNro(e.target.value)} placeholder="Ej.: QR-20261113-0001" maxLength={100} />

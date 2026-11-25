@@ -1,5 +1,7 @@
 import { adminResumen, type TipoUsuario } from "../../api";
 import type { Seccion } from "./PanelAdmin";
+import Cifras from "../Cifras";
+import { IconCalendario, IconDinero, IconEscuela, IconMusica, IconUsuario, IconUsuarioMas } from "../Icons";
 import Estado from "./Estado";
 import { useCarga } from "./useCarga";
 import { bs } from "./util";
@@ -23,8 +25,8 @@ export default function Resumen({ onExpira, irA }: Props) {
   const pendientes = todos.filter((p) => p.cantidad !== null);
 
   return (
-    <>
-      <section className="panel-bloque">
+    <div className="inicio-grid">
+      <section className="tarjeta">
         <h2>Requiere tu atención</h2>
         <ul className="pendientes">
           {pendientes.map((p) => (
@@ -43,19 +45,21 @@ export default function Resumen({ onExpira, irA }: Props) {
         </ul>
       </section>
 
-      <section className="panel-bloque">
+      <aside className="inicio-lado">
         <h2>La academia hoy</h2>
-        <dl className="cifras">
-          <div><dt>Estudiantes activos</dt><dd>{datos.estudiantes}</dd></div>
-          <div><dt>Docentes</dt><dd>{datos.docentes}</dd></div>
-          <div><dt>Invitados por inscribir</dt><dd>{datos.invitados}</dd></div>
-          <div><dt>Cursos activos</dt><dd>{datos.cursosActivos}</dd></div>
-          <div><dt>Inscripciones activas</dt><dd>{datos.inscripcionesActivas}</dd></div>
-          {datos.ingresosMes !== null && (
-            <div><dt>Ingresos aprobados este mes</dt><dd>{bs(datos.ingresosMes)}</dd></div>
-          )}
-        </dl>
-      </section>
-    </>
+        <Cifras
+          items={[
+            { etiqueta: "Estudiantes activos", valor: datos.estudiantes, icono: <IconEscuela size={22} />, tono: "azul" },
+            { etiqueta: "Docentes", valor: datos.docentes, icono: <IconUsuario size={22} />, tono: "morado" },
+            { etiqueta: "Invitados por inscribir", valor: datos.invitados, icono: <IconUsuarioMas size={22} />, tono: "naranja" },
+            { etiqueta: "Cursos activos", valor: datos.cursosActivos, icono: <IconMusica size={22} />, tono: "verde" },
+            { etiqueta: "Inscripciones activas", valor: datos.inscripcionesActivas, icono: <IconCalendario size={22} />, tono: "azul" },
+            ...(datos.ingresosMes !== null
+              ? [{ etiqueta: "Ingresos aprobados este mes", valor: bs(datos.ingresosMes), icono: <IconDinero size={22} />, tono: "verde" as const }]
+              : []),
+          ]}
+        />
+      </aside>
+    </div>
   );
 }

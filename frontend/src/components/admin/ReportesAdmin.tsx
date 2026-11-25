@@ -1,7 +1,17 @@
 import { descargarReporteAdmin, type ReporteAdmin, type TipoUsuario } from "../../api";
+import type { ReactNode } from "react";
 import BotonExcel from "../BotonExcel";
+import { IconDinero, IconGrafico, IconMusica, IconReloj, IconUsuario } from "../Icons";
 
 type Props = { onExpira: () => void; tipoUsuario: TipoUsuario };
+
+const ICONO: Record<ReporteAdmin, ReactNode> = {
+  horarios: <IconReloj size={24} />,
+  cursos: <IconMusica size={24} />,
+  usuarios: <IconUsuario size={24} />,
+  cuotas: <IconGrafico size={24} />,
+  pagos: <IconDinero size={24} />,
+};
 
 const REPORTES: { tipo: ReporteAdmin; titulo: string; detalle: string; finanzas: boolean }[] = [
   { tipo: "horarios", titulo: "Horarios", detalle: "Cuadrícula semanal de toda la academia, una hoja por aula y la lista de clases.", finanzas: false },
@@ -16,8 +26,9 @@ export default function ReportesAdmin({ onExpira, tipoUsuario }: Props) {
   return (
     <ul className="lista-reportes">
       {REPORTES.filter((r) => veFinanzas || !r.finanzas).map((r) => (
-        <li key={r.tipo}>
-          <div>
+        <li key={r.tipo} className={`reporte-${r.tipo}`}>
+          <span className="reporte-icono">{ICONO[r.tipo]}</span>
+          <div className="reporte-texto">
             <strong>{r.titulo}</strong>
             <p className="muted">{r.detalle}</p>
           </div>

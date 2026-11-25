@@ -10,6 +10,9 @@ import {
   type TipoMaterial,
 } from "../../api";
 import Estado from "../admin/Estado";
+import BotonIcono from "../Leyenda";
+import { IconExterno, IconPausa, IconPlay } from "../Icons";
+import ZonaArchivo from "../ZonaArchivo";
 import { useCarga } from "../admin/useCarga";
 import { fecha } from "../admin/util";
 import { enlaceSeguro, TIPO_MATERIAL } from "./util";
@@ -18,6 +21,7 @@ type Props = { onExpira: () => void };
 type Aviso = { clase: "ok" | "error"; texto: string };
 
 const TIPOS = Object.keys(TIPO_MATERIAL) as TipoMaterial[];
+const EXTENSIONES = ["pdf", "png", "jpg", "jpeg", "webp", "mp3", "wav", "ogg", "mp4", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt", "zip", "mid", "midi", "mscz"];
 
 export default function MaterialDoc({ onExpira }: Props) {
   const material = useCarga(docMaterial, onExpira);
@@ -32,7 +36,6 @@ export default function MaterialDoc({ onExpira }: Props) {
   const [descripcion, setDescripcion] = useState("");
   const [tipo, setTipo] = useState<TipoMaterial>("GUIA");
   const [archivo, setArchivo] = useState<File | null>(null);
-  const [claveArchivo, setClaveArchivo] = useState(0);
 
   const listaCursos = cursos.datos ?? [];
   const cursoElegido = idCurso ?? listaCursos.find((c) => c.activo)?.idCurso ?? listaCursos[0]?.idCurso ?? null;
@@ -58,7 +61,6 @@ export default function MaterialDoc({ onExpira }: Props) {
       setTitulo("");
       setDescripcion("");
       setArchivo(null);
-      setClaveArchivo((k) => k + 1);
       material.recargar();
     } catch (err) {
       if (err instanceof NoAutenticadoError) return onExpira();
@@ -85,7 +87,8 @@ export default function MaterialDoc({ onExpira }: Props) {
 
   return (
     <>
-      <section className="panel-bloque">
+      <div className="dos-columnas panel-bloque">
+      <section className="tarjeta">
         <h2>Agregar material</h2>
         {cursos.datos && listaCursos.length === 0 ? (
           <p className="muted">Necesitas tener un curso asignado para publicar material.</p>
@@ -111,21 +114,20 @@ export default function MaterialDoc({ onExpira }: Props) {
               Título
               <input className="input-chico" type="text" required maxLength={150} value={titulo} onChange={(e) => setTitulo(e.target.value)} />
             </label>
-            <label className="ancho-completo">
-              Archivo (PDF, imagen, audio, video, Word, PowerPoint, Excel o ZIP · hasta 20 MB)
-              <input
-                key={claveArchivo}
-                className="input-chico"
-                type="file"
-                required
-                accept=".pdf,.png,.jpg,.jpeg,.webp,.mp3,.wav,.ogg,.mp4,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.mid,.midi,.mscz"
-                onChange={(e) => {
-                  const f = e.target.files?.[0] ?? null;
+            <div className="ancho-completo campo-archivo">
+              <span className="etiqueta">Archivo</span>
+              <ZonaArchivo
+                archivo={archivo}
+                extensiones={EXTENSIONES}
+                maxMB={20}
+                disabled={enviando}
+                detalle="PDF, imagen, audio, video, Word, PowerPoint, Excel o ZIP · hasta 20 MB"
+                onCambio={(f) => {
                   setArchivo(f);
                   if (f && titulo.trim() === "") setTitulo(f.name.replace(/\.[^.]+$/, ""));
                 }}
               />
-            </label>
+            </div>
             <label className="ancho-completo">
               Descripción (opcional)
               <textarea className="input-chico" rows={2} maxLength={1000} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
@@ -138,6 +140,19 @@ export default function MaterialDoc({ onExpira }: Props) {
           </form>
         )}
       </section>
+
+      <aside className="tarjeta tarjeta-lado">
+        <h2>Tu material en números</h2>
+        <ul className="lista-numeros">
+          <li><span>Publicado</span><strong>{(material.datos ?? []).filter((m) => m.activo).length}</strong></li>
+          <li><span>Retirado</span><strong>{(material.datos ?? []).filter((m) => !m.activo).length}</strong></li>
+          {TIPOS.filter((t) => (material.datos ?? []).some((m) => m.tipo === t)).map((t) => (
+            <li key={t}><span>{TIPO_MATERIAL[t]}</span><strong>{(material.datos ?? []).filter((m) => m.tipo === t).length}</strong></li>
+          ))}
+        </ul>
+        <p className="muted nota-lado">Los alumnos inscritos en el curso ven el material publicado en su sección <strong>Material de apoyo</strong> y lo pueden abrir o descargar.</p>
+      </aside>
+      </div>
 
       <section className="panel-bloque">
         <h2>Tu material publicado</h2>
@@ -153,7 +168,7 @@ export default function MaterialDoc({ onExpira }: Props) {
                   <th>Curso</th>
                   <th>Tipo</th>
                   <th>Estado</th>
-                  <th></th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -164,15 +179,7 @@ export default function MaterialDoc({ onExpira }: Props) {
                       <td className="texto-largo">
                         <strong>{m.titulo}</strong>
                         {m.descripcion && <div className="sub">{m.descripcion}</div>}
-                        <div className="sub">
-                          Subido el {fecha(m.fechaSubida)}
-                          {href && (
-                            <>
-                              {" · "}
-                              <a href={href} target="_blank" rel="noopener noreferrer">Abrir</a>
-                            </>
-                          )}
-                        </div>
+                        <div className="sub">Subido el {fecha(m.fechaSubida)}</div>
                       </td>
                       <td>{m.curso}</td>
                       <td>{TIPO_MATERIAL[m.tipo]}</td>
@@ -180,9 +187,18 @@ export default function MaterialDoc({ onExpira }: Props) {
                         <span className={m.activo ? "pill ok" : "pill off"}>{m.activo ? "Publicado" : "Retirado"}</span>
                       </td>
                       <td className="acciones">
-                        <button className="btn-ghost chico" disabled={ocupado === m.id} onClick={() => cambiarEstado(m)}>
-                          {m.activo ? "Retirar" : "Publicar de nuevo"}
-                        </button>
+                        <div className="grupo-iconos">
+                          {href && (
+                            <BotonIcono texto="Abrir archivo" icono={<IconExterno size={18} />} onClick={() => window.open(href, "_blank", "noopener,noreferrer")} />
+                          )}
+                          <BotonIcono
+                            texto={m.activo ? "Retirar material" : "Publicar de nuevo"}
+                            icono={m.activo ? <IconPausa size={18} /> : <IconPlay size={18} />}
+                            tono={m.activo ? "peligro" : "exito"}
+                            disabled={ocupado === m.id}
+                            onClick={() => cambiarEstado(m)}
+                          />
+                        </div>
                       </td>
                     </tr>
                   );

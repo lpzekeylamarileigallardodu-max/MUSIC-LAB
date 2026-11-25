@@ -9,6 +9,8 @@ import {
   type UsuarioAdmin,
 } from "../../api";
 import BotonExcel from "../BotonExcel";
+import BotonIcono from "../Leyenda";
+import { IconBasura, IconEditar, IconLista, IconUsuarioMas } from "../Icons";
 import EditarUsuario from "./EditarUsuario";
 import Estado from "./Estado";
 import InscripcionesUsuario from "./InscripcionesUsuario";
@@ -140,21 +142,23 @@ export default function UsuariosAdmin({ onExpira, tipoUsuario }: Props) {
                   </td>
                   <td>{fecha(u.fechaRegistro)}</td>
                   <td className="acciones">
-                    {(u.tipoUsuario === "INVITADO" || u.tipoUsuario === "ESTUDIANTE") && (
-                      <button className="btn-ghost chico" disabled={ocupado === u.id || !u.activo} onClick={() => setInscribiendo(u)}>
-                        {u.tipoUsuario === "INVITADO" ? "Inscribir" : "Inscripciones"}
-                      </button>
-                    )}
-                    {esDirector && (
-                      <>
-                        <button className="btn-ghost chico" disabled={ocupado === u.id} onClick={() => setEditando(u)}>
-                          Editar
-                        </button>
-                        <button className="btn-ghost chico btn-peligro" disabled={ocupado === u.id} onClick={() => eliminar(u)}>
-                          Eliminar
-                        </button>
-                      </>
-                    )}
+                    <div className="grupo-iconos">
+                      {(u.tipoUsuario === "INVITADO" || u.tipoUsuario === "ESTUDIANTE") && (
+                        <BotonIcono
+                          texto={u.tipoUsuario === "INVITADO" ? "Inscribir a un curso" : "Ver inscripciones"}
+                          icono={u.tipoUsuario === "INVITADO" ? <IconUsuarioMas size={18} /> : <IconLista size={18} />}
+                          tono={u.tipoUsuario === "INVITADO" ? "exito" : "normal"}
+                          disabled={ocupado === u.id || !u.activo}
+                          onClick={() => setInscribiendo(u)}
+                        />
+                      )}
+                      {esDirector && (
+                        <>
+                          <BotonIcono texto="Editar usuario" icono={<IconEditar size={18} />} disabled={ocupado === u.id} onClick={() => setEditando(u)} />
+                          <BotonIcono texto="Eliminar usuario" icono={<IconBasura size={18} />} tono="peligro" disabled={ocupado === u.id} onClick={() => eliminar(u)} />
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

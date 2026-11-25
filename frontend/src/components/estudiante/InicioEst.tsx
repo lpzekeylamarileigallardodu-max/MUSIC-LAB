@@ -1,5 +1,7 @@
 import { estResumen } from "../../api";
 import Estado from "../admin/Estado";
+import Cifras from "../Cifras";
+import { IconCheck, IconDinero, IconGrafico, IconMusica } from "../Icons";
 import { useCarga } from "../admin/useCarga";
 import { bs, diaCorto } from "../admin/util";
 import type { SeccionEst } from "./PanelEstudiante";
@@ -50,9 +52,10 @@ export default function InicioEst({ onExpira, irA }: Props) {
   const clase = datos.proximaClase;
 
   return (
-    <>
+    <div className="inicio-grid">
+      <div className="inicio-principal">
       {clase && (
-        <section className="panel-bloque">
+        <section className="tarjeta">
           <h2>Tu próxima clase</h2>
           <div className="proxima-clase">
             <div className="proxima-dia">{diaCorto(clase.dia)}</div>
@@ -66,7 +69,7 @@ export default function InicioEst({ onExpira, irA }: Props) {
         </section>
       )}
 
-      <section className="panel-bloque">
+      <section className="tarjeta">
         <h2>Requiere tu atención</h2>
         {avisos.length === 0 ? (
           <p className="muted">Estás al día. No tienes pendientes.</p>
@@ -84,21 +87,24 @@ export default function InicioEst({ onExpira, irA }: Props) {
         )}
       </section>
 
-      <section className="panel-bloque">
+      </div>
+
+      <aside className="inicio-lado">
         <h2>Tu progreso</h2>
-        <dl className="cifras">
-          <div><dt>Cursos activos</dt><dd>{datos.cursosActivos}</dd></div>
-          <div>
-            <dt>Asistencia</dt>
-            <dd>{datos.asistenciaPorcentaje === null ? "—" : `${datos.asistenciaPorcentaje}%`}</dd>
-          </div>
-          <div>
-            <dt>Promedio de notas</dt>
-            <dd>{datos.promedioNotas === null ? "—" : datos.promedioNotas}</dd>
-          </div>
-          <div><dt>Por pagar</dt><dd>{bs(datos.montoPorPagar)}</dd></div>
-        </dl>
-      </section>
-    </>
+        <Cifras
+          items={[
+            { etiqueta: "Cursos activos", valor: datos.cursosActivos, icono: <IconMusica size={22} />, tono: "azul" },
+            {
+              etiqueta: "Asistencia",
+              valor: datos.asistenciaPorcentaje === null ? "—" : `${datos.asistenciaPorcentaje}%`,
+              icono: <IconCheck size={22} />,
+              tono: "verde",
+            },
+            { etiqueta: "Promedio de notas", valor: datos.promedioNotas === null ? "—" : datos.promedioNotas, icono: <IconGrafico size={22} />, tono: "morado" },
+            { etiqueta: "Por pagar", valor: bs(datos.montoPorPagar), icono: <IconDinero size={22} />, tono: datos.montoPorPagar > 0 ? "rojo" : "verde" },
+          ]}
+        />
+      </aside>
+    </div>
   );
 }

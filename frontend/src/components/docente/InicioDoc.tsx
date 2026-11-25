@@ -1,5 +1,7 @@
 import { docResumen } from "../../api";
 import Estado from "../admin/Estado";
+import Cifras from "../Cifras";
+import { IconCalendario, IconCheck, IconMusica, IconUsuario } from "../Icons";
 import { useCarga } from "../admin/useCarga";
 import { diaCorto } from "../admin/util";
 import { diaDeFecha, hoy } from "./util";
@@ -43,9 +45,10 @@ export default function InicioDoc({ onExpira, irA }: Props) {
   const clase = datos.proximaClase;
 
   return (
-    <>
+    <div className="inicio-grid">
+      <div className="inicio-principal">
       {clase && (
-        <section className="panel-bloque">
+        <section className="tarjeta">
           <h2>Tu próxima clase</h2>
           <div className="proxima-clase">
             <div className="proxima-dia">{etiquetaDia(clase.fecha, clase.dia)}</div>
@@ -59,7 +62,7 @@ export default function InicioDoc({ onExpira, irA }: Props) {
         </section>
       )}
 
-      <section className="panel-bloque">
+      <section className="tarjeta">
         <h2>Requiere tu atención</h2>
         {avisos.length === 0 ? (
           <p className="muted">Estás al día. No tienes pendientes.</p>
@@ -77,18 +80,24 @@ export default function InicioDoc({ onExpira, irA }: Props) {
         )}
       </section>
 
-      <section className="panel-bloque">
+      </div>
+
+      <aside className="inicio-lado">
         <h2>Tus cursos en números</h2>
-        <dl className="cifras">
-          <div><dt>Cursos activos</dt><dd>{datos.cursosActivos}</dd></div>
-          <div><dt>Alumnos activos</dt><dd>{datos.alumnosActivos}</dd></div>
-          <div><dt>Clases hoy</dt><dd>{datos.clasesHoy}</dd></div>
-          <div>
-            <dt>Asistencia de tus alumnos</dt>
-            <dd>{datos.asistenciaPorcentaje === null ? "—" : `${datos.asistenciaPorcentaje}%`}</dd>
-          </div>
-        </dl>
-      </section>
-    </>
+        <Cifras
+          items={[
+            { etiqueta: "Cursos activos", valor: datos.cursosActivos, icono: <IconMusica size={22} />, tono: "azul" },
+            { etiqueta: "Alumnos activos", valor: datos.alumnosActivos, icono: <IconUsuario size={22} />, tono: "morado" },
+            { etiqueta: "Clases hoy", valor: datos.clasesHoy, icono: <IconCalendario size={22} />, tono: "naranja" },
+            {
+              etiqueta: "Asistencia de tus alumnos",
+              valor: datos.asistenciaPorcentaje === null ? "—" : `${datos.asistenciaPorcentaje}%`,
+              icono: <IconCheck size={22} />,
+              tono: "verde",
+            },
+          ]}
+        />
+      </aside>
+    </div>
   );
 }

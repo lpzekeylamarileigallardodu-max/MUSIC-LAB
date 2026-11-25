@@ -148,3 +148,136 @@ export const IconCalendario = (p: IconProps) => (
     <path d="M16 2v4M8 2v4M3 10h18" />
   </Linea>
 );
+
+export const IconEditar = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </Linea>
+);
+
+export const IconBasura = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    <path d="M10 11v6M14 11v6" />
+  </Linea>
+);
+
+export const IconUsuarioMas = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M19 8v6M22 11h-6" />
+  </Linea>
+);
+
+export const IconLista = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+  </Linea>
+);
+
+export const IconDescargar = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <path d="M7 10l5 5 5-5M12 15V3" />
+  </Linea>
+);
+
+export const IconSubir = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M16 16l-4-4-4 4M12 12v9" />
+    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+  </Linea>
+);
+
+export const IconArchivo = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+  </Linea>
+);
+
+export const IconImagen = (p: IconProps) => (
+  <Linea {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <path d="M21 15l-5-5L5 21" />
+  </Linea>
+);
+
+export const IconCheck = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M20 6 9 17l-5-5" />
+  </Linea>
+);
+
+export const IconCopiar = (p: IconProps) => (
+  <Linea {...p}>
+    <rect x="9" y="9" width="13" height="13" rx="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </Linea>
+);
+
+export const IconPausa = (p: IconProps) => (
+  <Linea {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M10 15V9M14 15V9" />
+  </Linea>
+);
+
+export const IconPlay = (p: IconProps) => (
+  <Linea {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M10 8l6 4-6 4Z" />
+  </Linea>
+);
+
+export const IconExterno = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" />
+  </Linea>
+);
+
+export const IconQr = (p: IconProps) => (
+  <Linea {...p}>
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3" />
+  </Linea>
+);
+
+export const IconAlerta = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+    <path d="M12 9v4M12 17h.01" />
+  </Linea>
+);
+
+export const IconGrafico = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M3 3v18h18" />
+    <path d="M7 15l4-4 3 3 5-6" />
+  </Linea>
+);
+
+export const IconRecargar = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M21 12a9 9 0 1 1-2.64-6.36L21 8" />
+    <path d="M21 3v5h-5" />
+  </Linea>
+);
+
+export const IconEscuela = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M22 10 12 5 2 10l10 5 10-5Z" />
+    <path d="M6 12v5c3 2 9 2 12 0v-5" />
+  </Linea>
+);
+
+export const IconMas = (p: IconProps) => (
+  <Linea {...p}>
+    <path d="M12 5v14M5 12h14" />
+  </Linea>
+);
